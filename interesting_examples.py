@@ -83,3 +83,16 @@ pieces = [df2[:3], df2[3:7],df2[7:]]
 pieces
 
 pd.concat(pieces)
+
+'''
+Evaluate Data Frames
+'''
+df.A < 0 #returns list of bools with result
+
+df[df.A < 0] # Basically a 'where' operation
+
+# Two conditions added together
+df[(df.A < 0) & (df.B > .5)]
+
+# Two conditions ORed together
+df[(df.A < -1) | (df.D > 0)]
