@@ -5,6 +5,18 @@ Created on 9/18/17
 @author: Zachary Oliver
 """
 
+import pandas as pd
+
+'''********************************************
+**********************READ*********************
+***********************************************
+'''
+def df_read_csv(path):
+    df = pd.read_csv(path)
+    return df
+
+def df_read_dict(df, dict):
+    df = pd.DataFrame.from_dict(dict)
 
 '''********************************************
 *********************PRINT*********************
@@ -29,11 +41,13 @@ def df_print_top(df,top):
 def df_print_bottom(df,bottom):
     print df.tail(bottom)
 
+def df_print_random_sample(df,size):
+    print df.sample(n=size, random_state=1)
+
 '''********************************************
 **********************GET**********************
 ***********************************************
 '''
-
 def df_get_columns_all_rows(df,columns_list):
     return df[columns_list]
 
@@ -51,3 +65,35 @@ def df_get_bottom(df,bottom):
 
 def df_get_rows_where_column_equals_value(df, column, value):
     return df.loc[(df[column] == value)]
+
+def df_get_random_sample(df,size):
+    return df.sample(n=size, random_state=1)
+
+'''********************************************
+********************COMBINE********************
+***********************************************
+'''
+def df_concat(df1, df2):
+    return pd.concat([df, df_temp], axis=1)
+
+'''********************************************
+********************REMOVE********************
+***********************************************
+'''
+def df_remove_column(df, column):
+    return df.drop(column, axis=1)
+
+'''********************************************
+********************RENAME********************
+***********************************************
+'''
+def df_rename_column(df, orig_column, new_column):
+    df.rename(columns={orig_column:new_column}, inplace=True)
+    return df
+
+'''********************************************
+*********************COUNT*********************
+***********************************************
+'''
+def df_print_index_counts(df):
+    print df.value_counts() #always displays highest to lowest

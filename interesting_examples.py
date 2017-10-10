@@ -96,3 +96,22 @@ df[(df.A < 0) & (df.B > .5)]
 
 # Two conditions ORed together
 df[(df.A < -1) | (df.D > 0)]
+
+'''
+Map List within Data Frame Column to Individual Columns
+'''
+# df.votes[0]               # {'cool': 2, 'funny': 0, 'useful': 5}
+df['cool'] = df.votes.map(lambda x : x['cool'])
+df['useful'] = df.votes.map(lambda x: x['useful'])
+df['funny'] = df.votes.map(lambda x: x['funny'])
+# Bronson - an easier way to get the cool, funny, useful:
+df_temp = pd.DataFrame.from_records(df.votes)
+df = pd.concat([df, df_temp], axis=1)
+
+'''
+Strip blank characters and convert objects to string
+'''
+m3_file.columns = m3_file.columns.str.strip()
+m3_file = m3_file.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+m3_file['Length'] = m3_file['Length'].astype(float)
+m3_file['Date'] = pd.to_datetime(m3_file['Date'])
