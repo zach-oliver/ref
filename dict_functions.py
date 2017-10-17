@@ -9,8 +9,8 @@ Created on 9/18/17
 *********************PRINT*********************
 ***********************************************
 '''
-def dict_print_value(dict, value):
-    print dict[value]
+def dict_print_value(dict, key):
+    print dict[key]
 
 def dict_print_keys(dict):
     print dict[0].keys()

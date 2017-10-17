@@ -15,8 +15,13 @@ def df_read_csv(path):
     df = pd.read_csv(path)
     return df
 
-def df_read_dict(df, dict):
+def df_read_dict(dict):
     df = pd.DataFrame.from_dict(dict)
+    return df
+
+def df_read_mongodb(cursor):
+    df = pd.DataFrame(list(cursor))
+    return df
 
 '''********************************************
 *********************PRINT*********************
@@ -57,6 +62,9 @@ def df_get_rows_all_columns(df,first,last):
 def df_get_rows_columns(df,first_row,last_row,columns_list):
     return df[first_row:last_row,columns_list]
 
+def df_get_row_column(df,row,column):
+    return df.iloc[row][column]
+
 def df_get_top(df,top):
     return df.head(top)
 
@@ -74,14 +82,14 @@ def df_get_random_sample(df,size):
 ***********************************************
 '''
 def df_concat(df1, df2):
-    return pd.concat([df, df_temp], axis=1)
+    return pd.concat([df1, df2], axis=1)
 
 '''********************************************
 ********************REMOVE********************
 ***********************************************
 '''
 def df_remove_column(df, column):
-    return df.drop(column, axis=1)
+    return df.drop(column, axis=1, inplace=True)
 
 '''********************************************
 ********************RENAME********************
@@ -97,3 +105,10 @@ def df_rename_column(df, orig_column, new_column):
 '''
 def df_print_index_counts(df):
     print df.value_counts() #always displays highest to lowest
+
+'''********************************************
+**********************SET**********************
+***********************************************
+'''
+def df_set_index(df, column):
+    print df.set_index(column, inplace=True) #always displays highest to lowest
