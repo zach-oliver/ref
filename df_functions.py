@@ -111,4 +111,4 @@ def df_print_index_counts(df):
 ***********************************************
 '''
 def df_set_index(df, column):
-    print df.set_index(column, inplace=True) #always displays highest to lowest
+    df.set_index(column, inplace=True) #always displays highest to lowest
