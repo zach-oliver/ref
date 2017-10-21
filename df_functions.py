@@ -53,6 +53,9 @@ def df_print_random_sample(df,size):
 **********************GET**********************
 ***********************************************
 '''
+def df_get_column_name(df, index):
+    return df.columns[index]
+
 def df_get_columns_all_rows(df,columns_list):
     return df[columns_list]
 
@@ -90,6 +93,9 @@ def df_concat(df1, df2):
 '''
 def df_remove_column(df, column):
     return df.drop(column, axis=1, inplace=True)
+
+def df_remove_column_by_index(df, index):
+    return df.drop(df.columns[index], axis=1, inplace=True)
 
 '''********************************************
 ********************RENAME********************
