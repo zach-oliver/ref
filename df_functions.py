@@ -84,7 +84,8 @@ def df_get_random_sample(df,size):
 ********************COMBINE********************
 ***********************************************
 '''
-def df_concat(df1, df2):
+#place the dfs on top of each other with axis=0
+def df_concat(df1, df2, axis=1):
     return pd.concat([df1, df2], axis=1)
 
 '''********************************************
