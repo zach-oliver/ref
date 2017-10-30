@@ -20,9 +20,19 @@ def list_sort(list):
     list.sort()
 
 '''********************************************
+*********************APPEND********************
+***********************************************
+'''
+def list_append(list, value):
+    list.append(value)
+
+'''********************************************
 *********************FIND**********************
 ***********************************************
 '''
+def list_find(list, find):
+    return list.index(find)
+
 def list_find_all(list, find):
     return [index for index, item in enumerate(list) if item == find]
 
