@@ -10,6 +10,21 @@ Created on 9/18/17
 ***********************************************
 '''
 
+# simulate splitting a dataset of 25 observations into 5 folds
+from sklearn.cross_validation import KFold
+kf = KFold(25, n_folds=5, shuffle=False)
+
+# print the contents of each training and testing set
+print '{} {:^61} {}'.format('Iteration', 'Training set observations', 'Testing set observations')
+for iteration, data in enumerate(kf, start=1):
+    print '{:^9} {} {:^25}'.format(iteration, data[0], data[1])
+# all of the above fits into a specific table format based on the number of characters
+
+'''********************************************
+*********************LISTS*********************
+***********************************************
+'''
+
 '''
 EXERCISE:
 
