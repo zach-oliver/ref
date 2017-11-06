@@ -118,4 +118,12 @@ def df_print_index_counts(df):
 ***********************************************
 '''
 def df_set_index(df, column):
-    df.set_index(column, inplace=True) #always displays highest to lowest
+    df.set_index([column], inplace=True) #always displays highest to lowest
+
+'''********************************************
+********************FORMAT*********************
+***********************************************
+'''
+def df_format_object_to_date(df, str_column):
+    df[str_column] = pd.to_datetime(df[str_column])
+    #df[str_column] = pd.to_datetime(df[str_column]).dt.strftime('%Y/%m/%d')

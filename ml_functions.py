@@ -7,8 +7,10 @@ Created on 10/23/17
 
 import sys
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import seaborn as sns
 import numpy as np
+from datetime import datetime
 
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
@@ -146,20 +148,53 @@ def k_nearest_neighbors(X, y):
 *************CORRELATION MATRIX****************
 ***********************************************
 '''
-def correlation_matrix(df):
+def ml_correlation_matrix(df):
     print df.corr()
     print type(sns.heatmap(df.corr()))
     print sns.heatmap(df.corr())
 
-def pair_plot(df, list_feature_colums, str_response_vector):
+'''********************************************
+********************CHARTS*********************
+***********************************************
+'''
+def ml_pair_plot(df, list_feature_cols, str_response_vector):
     # multiple scatter plots in Seaborn
     print sns.pairplot(df, x_vars=list_feature_cols, y_vars=str_response_vector, kind='reg')
+
+def ml_time_plot(df):
+    # built from: https://stackoverflow.com/questions/41815126/plot-datetime-date-pandas
+    # library: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.plot.html
+    print df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5))
+
+
+def ml_time_plot_multiple_y(df, df2, str_title=''):
+    if df.empty & df2.empty:
+        return False
+    elif df.empty:
+        plot = df2.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), title=str_title)
+    elif df2.empty:
+        plot = df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), title=str_title)
+    else:
+        fig, ax = plt.subplots(figsize=(8,5))
+        ax = df2.plot(use_index=True, style='x')
+        plot = df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), ax=ax, title=str_title)
+    '''
+    plt.plot(df.index, df[str_column])
+    plt.plot(df2.index, df2[str_column])
+    print plt.show()
+    '''
+    print plot
+    return plot
+
+def ml_save_plot(plot, str_path):
+    figure = plot.get_figure()
+    figure.savefig(str_path, format='png', dpi=400)
 
 '''********************************************
 ****************CREATE DUMMIES*****************
 ***********************************************
 '''
-def create_dummies(df, series, label):
+def ml_create_dummies(df, series, label):
     # create dummy variables
     dummies = pd.get_dummies(series, prefix=label)
     df_remove_column_by_index(dummies, 0)
