@@ -110,8 +110,20 @@ def df_rename_column(df, orig_column, new_column):
 *********************COUNT*********************
 ***********************************************
 '''
-def df_print_index_counts(df):
-    print df.value_counts() #always displays highest to lowest
+def df_print_index_counts(df, debug=False):
+    if debug:
+        print df.value_counts() #always displays highest to lowest
+    return df.value_counts()
+
+def df_print_row_count(df, debug=False):
+    if debug:
+        print df.shape[0]
+    return df.shape[0] #gives number of row count
+
+def df_print_column_count(df, debug=False):
+    if debug:
+        print df.shape[1]
+    return df.shape[1] #gives number of column count
 
 '''********************************************
 **********************SET**********************

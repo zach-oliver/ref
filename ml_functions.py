@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
 from list_functions import list_find, list_append
-from df_functions import df_remove_column_by_index, df_concat
+from df_functions import df_remove_column_by_index, df_concat, df_print_row_count
 
 sys.path.insert(0, './')
 
@@ -161,19 +161,19 @@ def ml_pair_plot(df, list_feature_cols, str_response_vector):
     # multiple scatter plots in Seaborn
     print sns.pairplot(df, x_vars=list_feature_cols, y_vars=str_response_vector, kind='reg')
 
-def ml_time_plot(df):
+def ml_time_plot(df, str_title=''):
     # built from: https://stackoverflow.com/questions/41815126/plot-datetime-date-pandas
     # library: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.plot.html
-    print df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5))
+    return df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), title=str_title)
 
 
 def ml_time_plot_multiple_y(df, df2, str_title=''):
     if df.empty & df2.empty:
         return False
     elif df.empty:
-        plot = df2.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), title=str_title)
+        plot = ml_time_plot(df2, str_title)
     elif df2.empty:
-        plot = df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), title=str_title)
+        plot = ml_time_plot(df, str_title)
     else:
         fig, ax = plt.subplots(figsize=(8,5))
         ax = df2.plot(use_index=True, style='x')
@@ -183,7 +183,7 @@ def ml_time_plot_multiple_y(df, df2, str_title=''):
     plt.plot(df2.index, df2[str_column])
     print plt.show()
     '''
-    print plot
+    #print plot
     return plot
 
 def ml_save_plot(plot, str_path):
