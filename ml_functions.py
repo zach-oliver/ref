@@ -14,8 +14,11 @@ from datetime import datetime
 
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
 
 from list_functions import list_find, list_append
 from df_functions import df_remove_column_by_index, df_concat, df_print_row_count
@@ -26,12 +29,11 @@ sys.path.insert(0, './')
 **************LINEAR REGRESSION****************
 ***********************************************
 '''
-def lin_reg_score(df, feature_columns, response_vector):
+def lin_reg_score(df, feature_columns, response_vector, numcv=10):
     # this model is for a continuous prediction vs a 1,0 or neighbors
     X = df[feature_columns]
     y = df[response_vector]
     #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=123)
-
     linreg = LinearRegression()
     #linreg.fit(X, y)
     ##linreg_mse_score = cross_val_score(linreg, X, y, cv=10, scoring='neg_mean_squared_error', n_jobs=-1)
@@ -47,34 +49,7 @@ def lin_reg_score(df, feature_columns, response_vector):
     ##linreg_rmse_scores = np.sqrt(linreg_mse_scores)
     ##return linreg_rmse_scores.mean()
     #lower RMSE the better
-    return np.sqrt(-cross_val_score(linreg, X, y, cv=10, scoring='neg_mean_squared_error', n_jobs=-1)).mean()
-
-def lin_reg_test_predict(df, feature_columns, response_vector):
-    # this model is for a continuous prediction vs a 1,0 or neighbors
-    X = df[feature_columns]
-    y = df[response_vector]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=123)
-
-    linreg = LinearRegression()
-    linreg.fit(X_train, y_train)
-    ##linreg_mse_score = cross_val_score(linreg, X, y, cv=10, scoring='neg_mean_squared_error', n_jobs=-1)
-
-    y_pred = linreg.predict(X_test)
-
-    #rmse_list = []
-    #rmse = np.sqrt(metrics.mean_squared_error(y_test, y_pred))
-    #list_append(rmse_list, rmse)
-    #return rmse_list
-
-    ##linreg_mse_score = -linreg_mse_score
-    ##linreg_rmse_scores = np.sqrt(linreg_mse_scores)
-    ##return linreg_rmse_scores.mean()
-    print "X_test type: " + type(X_test)
-    print "y_pred type: " + type(y_pred)
-    results = df_concat(X_test, y_pred)
-    #return np.sqrt(-cross_val_score(linreg, X, y, cv=10, scoring='neg_mean_squared_error', n_jobs=-1)).mean()
-    print results
-    return results
+    return np.sqrt(-cross_val_score(linreg, X, y, cv=numcv, scoring='neg_mean_squared_error')).mean()
 
 def lin_reg_model(df, feature_columns, response_vector):
     # this model is for a continuous prediction vs a 1,0 or neighbors
@@ -97,6 +72,86 @@ def lin_reg_model(df, feature_columns, response_vector):
     ##linreg_rmse_scores = np.sqrt(linreg_mse_scores)
     ##return linreg_rmse_scores.mean()
     return linreg
+
+def lin_reg_predict(df, list_feature_columns, lin_reg):
+    # this model is for a continuous prediction vs a 1,0 or neighbors
+    X = df[list_feature_columns]
+
+    df_y_pred = lin_reg.predict(X)
+
+    return df_y_pred
+
+'''********************************************
+************POLYNOMIAL REGRESSION**************
+***********************************************
+'''
+def ply_reg_score(df, feature_columns, response_vector, deg=2, numcv=10):
+    # create a model pipeline so X becomes polynomial and feeds it to the linear regression
+    # http://scikit-learn.org/stable/auto_examples/model_selection/plot_underfitting_overfitting.html#sphx-glr-auto-examples-model-selection-plot-underfitting-overfitting-py
+    '''
+    model = Pipeline([('poly', PolynomialFeatures(degree=deg)),('linear', LinearRegression(fit_intercept=False))])
+    y = 3 - 2 * x + x ** 2 - x ** 3
+    model = model.fit(x[:, np.newaxis], y)
+    model.named_steps['linear'].coef_
+        array([ 3., -2.,  1., -1.])
+    '''
+    # basic polynomial regression
+    '''
+    X = [[0.44, 0.68], [0.99, 0.23]]
+    vector = [109.85, 155.72]
+    predict= [0.49, 0.18]
+    poly = PolynomialFeatures(degree=2)
+    X_ = poly.fit_transform(X)
+    predict_ = poly.fit_transform(predict)
+    clf = linear_model.LinearRegression()
+    clf.fit(X_, vector)
+    print clf.predict(predict_)
+    '''
+    # this model is for a continuous prediction vs a 1,0 or neighbors
+    X = df[feature_columns] #x = np.arange(5)
+    y = df[response_vector]
+
+    scores = []
+    for i in range(10):
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+        poly = PolynomialFeatures(degree=deg)
+        X_train_poly = poly.fit_transform(X_train)
+        X_test_poly = poly.fit_transform(X_test)
+
+        linreg = LinearRegression()
+        linreg.fit(X_train_poly, y_train)
+
+        y_pred = linreg.predict(X_test_poly)
+
+        list_append(scores, np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+    #print scores
+    return (sum(scores) / float(len(scores)))
+
+def ply_reg_model(df, feature_columns, response_vector, deg=2):
+    # this model is for a continuous prediction vs a 1,0 or neighbors
+    X = df[feature_columns] #x = np.arange(5)
+    y = df[response_vector]
+
+    poly = PolynomialFeatures(degree=deg)
+    X_poly = poly.fit_transform(X)
+
+    linreg = LinearRegression()
+    linreg.fit(X_poly, y)
+
+    return linreg
+
+def ply_reg_predict(df, list_feature_columns, lin_reg, deg=2):
+    # polynomial regression still uses linear regression but with polynomial features
+    X = df[list_feature_columns]
+
+    poly = PolynomialFeatures(degree=deg)
+    X_poly = poly.fit_transform(X)
+
+    df_y_pred = lin_reg.predict(X_poly)
+
+    return df_y_pred
 
 '''********************************************
 **************LOGISTIC REGRESSION****************
@@ -176,14 +231,9 @@ def ml_time_plot_multiple_y(df, df2, str_title=''):
         plot = ml_time_plot(df, str_title)
     else:
         fig, ax = plt.subplots(figsize=(8,5))
-        ax = df2.plot(use_index=True, style='x')
+        ax = df2.plot(use_index=True, style='x', ax=ax)
         plot = df.plot(style='x', use_index=True, grid=True, legend=True, rot=60, fontsize=8, figsize=(8,5), ax=ax, title=str_title)
-    '''
-    plt.plot(df.index, df[str_column])
-    plt.plot(df2.index, df2[str_column])
-    print plt.show()
-    '''
-    #print plot
+
     return plot
 
 def ml_save_plot(plot, str_path):

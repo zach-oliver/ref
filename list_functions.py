@@ -36,6 +36,12 @@ def list_find(list, find):
 def list_find_all(list, find):
     return [index for index, item in enumerate(list) if item == find]
 
+def list_find_minimum_value_index(list):
+    return list.index(min(list))
+
+def list_find_maximum_value_index(list):
+    return list.index(max(list))
+
 '''********************************************
 *********************REPLACE*******************
 ***********************************************
