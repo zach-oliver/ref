@@ -13,15 +13,18 @@ import numpy as np
 from datetime import datetime
 
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 
-from list_functions import list_find, list_append
+from list_functions import list_find, list_append, list_find_minimum_value_index
 from df_functions import df_remove_column_by_index, df_concat, df_print_row_count
+from dict_functions import dict_get_value
 
 sys.path.insert(0, './')
 
@@ -85,72 +88,136 @@ def lin_reg_predict(df, list_feature_columns, lin_reg):
 ************POLYNOMIAL REGRESSION**************
 ***********************************************
 '''
-def ply_reg_score(df, feature_columns, response_vector, deg=2, numcv=10):
+def ply_reg_score(df, feature_columns, response_vector, numcv=10):
     # create a model pipeline so X becomes polynomial and feeds it to the linear regression
     # http://scikit-learn.org/stable/auto_examples/model_selection/plot_underfitting_overfitting.html#sphx-glr-auto-examples-model-selection-plot-underfitting-overfitting-py
-    '''
-    model = Pipeline([('poly', PolynomialFeatures(degree=deg)),('linear', LinearRegression(fit_intercept=False))])
-    y = 3 - 2 * x + x ** 2 - x ** 3
-    model = model.fit(x[:, np.newaxis], y)
-    model.named_steps['linear'].coef_
-        array([ 3., -2.,  1., -1.])
-    '''
+    # https://github.com/QCaudron/polynomial_regression/blob/master/polynomial_regression.ipynb
+
     # basic polynomial regression
-    '''
-    X = [[0.44, 0.68], [0.99, 0.23]]
-    vector = [109.85, 155.72]
-    predict= [0.49, 0.18]
-    poly = PolynomialFeatures(degree=2)
-    X_ = poly.fit_transform(X)
-    predict_ = poly.fit_transform(predict)
-    clf = linear_model.LinearRegression()
-    clf.fit(X_, vector)
-    print clf.predict(predict_)
-    '''
+    model = Pipeline([
+        ("polynomial_features", PolynomialFeatures()),  # let's take linear x and make polynomial features from it
+        ("linear_regression", LinearRegression(fit_intercept=True))  # then a linear regression on the polynomial features
+    ])
+
+    # Now we decide on what hyperparameters of the model we allow to vary.
+    # In this case, we'll vary the degree of the polynomial.
+    #Let's build the same model and grid search over the polynomial degree but also over whether we only want interaction terms or if we want to allow cross-terms. Our ground truth is a degree-3 polynomial with both cross- and interaction-terms.
+    parameters = {
+        "polynomial_features__degree": [1, 2, 3, 4, 5],
+        "polynomial_features__interaction_only": [True, False]
+    }
+
     # this model is for a continuous prediction vs a 1,0 or neighbors
     X = df[feature_columns] #x = np.arange(5)
     y = df[response_vector]
 
-    scores = []
-    for i in range(10):
-        X_train, X_test, y_train, y_test = train_test_split(X, y)
+    gridsearch = GridSearchCV(
+    model,  # our pipeline
+    parameters,  # the parameters of the pipeline that we want to vary
+    #n_jobs=-1,  # use all cores on our computer
+    scoring="neg_mean_squared_error",  # evaluate the model using mean squared error
+    cv=numcv  # and perform 5-fold cross-validation to score the model
+    )
 
-        poly = PolynomialFeatures(degree=deg)
-        X_train_poly = poly.fit_transform(X_train)
-        X_test_poly = poly.fit_transform(X_test)
+    gridsearch.fit(X, y)  # sklearn wants *observations* in the first axis and *features* in the second axis
 
-        linreg = LinearRegression()
-        linreg.fit(X_train_poly, y_train)
+    scores = gridsearch.cv_results_['mean_test_score']
+    #print results
+    scores[:] = [np.sqrt(abs(x)) for x in scores]
 
-        y_pred = linreg.predict(X_test_poly)
+    #print("Best RMSE score ( lower is better ) : {}".format(gridsearch.best_score_))
+    #print("Best hyperparameters : {}".format(gridsearch.best_params_))
 
-        list_append(scores, np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    #best_model = gridsearch.best_estimator_
+    #print(best_model)
 
-    #print scores
-    return (sum(scores) / float(len(scores)))
+    # Predict y_hat from our input features
+    #df["yhat"] = gridsearch.best_estimator_.predict(df[["rooms", "baths", "sqft"]])
 
-def ply_reg_model(df, feature_columns, response_vector, deg=2):
+    #print results
+    return [gridsearch.best_score_, dict_get_value(gridsearch.best_params_, 'polynomial_features__degree'), dict_get_value(gridsearch.best_params_, 'polynomial_features__interaction_only')]
+
+def ply_reg_model(df, feature_columns, response_vector, numcv=10, degree=[1,2,3,4,5]):
+    # https://github.com/QCaudron/polynomial_regression/blob/master/polynomial_regression.ipynb
+
+    model = Pipeline([
+        ("polynomial_features", PolynomialFeatures()),  # let's take linear x and make polynomial features from it
+        ("linear_regression", LinearRegression(fit_intercept=True))  # then a linear regression on the polynomial features
+    ])
+
+    parameters = {
+        "polynomial_features__degree": [degree],
+        "polynomial_features__interaction_only": [True, False]
+    }
+
     # this model is for a continuous prediction vs a 1,0 or neighbors
     X = df[feature_columns] #x = np.arange(5)
     y = df[response_vector]
 
-    poly = PolynomialFeatures(degree=deg)
-    X_poly = poly.fit_transform(X)
+    gridsearch = GridSearchCV(
+    model,  # our pipeline
+    parameters,  # the parameters of the pipeline that we want to vary
+    #n_jobs=-1,  # use all cores on our computer
+    scoring="neg_mean_squared_error",  # evaluate the model using mean squared error
+    cv=numcv  # and perform 5-fold cross-validation to score the model
+    )
 
-    linreg = LinearRegression()
-    linreg.fit(X_poly, y)
+    gridsearch.fit(X, y)  # sklearn wants *observations* in the first axis and *features* in the second axis
 
-    return linreg
+    return gridsearch.best_estimator_
 
-def ply_reg_predict(df, list_feature_columns, lin_reg, deg=2):
+def ply_reg_predict(df, list_feature_columns, best_estimator):
     # polynomial regression still uses linear regression but with polynomial features
     X = df[list_feature_columns]
 
-    poly = PolynomialFeatures(degree=deg)
-    X_poly = poly.fit_transform(X)
+    df_y_pred = best_estimator.predict(X)
 
-    df_y_pred = lin_reg.predict(X_poly)
+    return df_y_pred
 
+'''********************************************
+***************DECISION TREE*******************
+***********************************************
+'''
+def decision_tree_score(df, list_feature_columns, str_response_vector, int_cv=10):
+    if len(df) < int_cv:
+        int_cv = int(len(df) * .75)
+    X = df[list_feature_columns]
+    y = df[str_response_vector]
+    treereg = DecisionTreeRegressor()
+    return np.sqrt(-cross_val_score(treereg, X, y, cv=int_cv, scoring='neg_mean_squared_error')).mean()
+
+def decision_tree_best_score_depth(df, list_feature_columns, str_response_vector, int_range=10, int_cv=10):
+    if len(df) < int_cv:
+        int_cv = int(len(df) * .75)
+
+    X = df[list_feature_columns]
+    y = df[str_response_vector]
+
+    # list of values to try
+    max_depth_range = range(1, int_range)
+
+    # list to store the average RMSE for each value of max_depth
+    scores = []
+
+    # use CV with each value of max_depth
+    for depth in max_depth_range:
+        treereg = DecisionTreeRegressor(max_depth=depth)
+        list_append(scores ,[(np.sqrt(-cross_val_score(treereg, X, y, cv=int_cv, scoring='neg_mean_squared_error')).mean()), depth])
+
+    best_depth_index = list_find_minimum_value_index(scores)
+    #print scores[best_depth_index]
+    return scores[best_depth_index]
+
+def decision_tree_model(df, list_feature_columns, str_response_vector, depth=None):
+    X = df[list_feature_columns]
+    y = df[str_response_vector]
+    treereg = DecisionTreeRegressor(max_depth=depth)
+    treereg.fit(X, y)
+    return treereg
+
+def decision_tree_predict(df, list_feature_columns, treereg):
+    X = df[list_feature_columns]
+    df_y_pred = treereg.predict(X)
     return df_y_pred
 
 '''********************************************
