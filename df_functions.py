@@ -81,6 +81,14 @@ def df_get_random_sample(df,size):
     return df.sample(n=size, random_state=1)
 
 '''********************************************
+********************CHANGE********************
+***********************************************
+'''
+#place the dfs on top of each other with axis=0
+def df_change_cell(df, str_index, str_column, value):
+    df.at[str_index, str_column] = value
+
+'''********************************************
 ********************COMBINE********************
 ***********************************************
 '''
@@ -104,7 +112,6 @@ def df_remove_column_by_index(df, index):
 '''
 def df_rename_column(df, orig_column, new_column):
     df.rename(columns={orig_column:new_column}, inplace=True)
-    return df
 
 '''********************************************
 *********************COUNT*********************
