@@ -84,7 +84,6 @@ def df_get_random_sample(df,size):
 ********************CHANGE********************
 ***********************************************
 '''
-#place the dfs on top of each other with axis=0
 def df_change_cell(df, str_index, str_column, value):
     df.at[str_index, str_column] = value
 

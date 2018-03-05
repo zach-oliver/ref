@@ -6,39 +6,51 @@ Created on 11/16/17
 """
 
 import boto3
+import boto
+import sys
+import os
+sys.path.insert(0, '../')
+from secrets import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+# http://ls.pwd.io/2013/06/parallel-s3-uploads-using-boto-and-threads-in-python/
+import threading
 
-# Let's use Amazon S3
-s3 = boto3.resource('s3')
 
-s3 = boto3.client('s3')
-s3.create_bucket(Bucket='my-bucket')
+#bucket_name = 'nyymbus-website'
 
-# Print out bucket names
-for bucket in s3.buckets.all():
-    print(bucket.name)
+bucket_name = 'johnxisxawesomex123'
 
-# Upload a new file
-data = open('test.jpg', 'rb')
-s3.Bucket('my-bucket').put_object(Key='test.jpg', Body=data)
+# reference: https://stackoverflow.com/questions/15085864/how-to-upload-a-file-to-directory-in-s3-bucket-using-boto
+conn = boto.connect_s3(AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY)
 
-for bucket in s3.buckets.all():
-    for obj in bucket.objects.filter(Prefix='photos/'):
-        print('{0}:{1}'.format(bucket.name, obj.key))
+bucket = conn.create_bucket(bucket_name,
+    location=boto.s3.connection.Location.DEFAULT)
 
-# S3 iterate over first ten buckets
-for bucket in s3.buckets.limit(10):
-    print(bucket.name)
+def upload(local_path, bucket_name, s3_path):
+    client.upload_file(local_path, bucket_name, s3_path)
+    return s3_path
 
-# S3 iterate over all objects 100 at a time
-for obj in bucket.objects.page_size(100):
-    print(obj.key)
+local_directory = r'C:/Users/zoliver/Google Drive/Nyymbus/Source/website/'
+destination = ''
 
-# Create a reusable Paginator
-paginator = client.get_paginator('list_objects')
 
-# Create a PageIterator from the Paginator
-# http://boto3.readthedocs.io/en/latest/guide/paginators.html
-page_iterator = paginator.paginate(Bucket='my-bucket')
+client = boto3.client('s3')
 
-for page in page_iterator:
-    print(page['Contents'])
+# enumerate local files recursively
+# https://gist.github.com/feelinc/d1f541af4f31d09a2ec3
+for root, dirs, files in os.walk(local_directory):
+
+  for filename in files:
+
+    # construct the full local path
+    local_path = os.path.join(root, filename)
+    print 'local: ' + local_path
+
+    relative_path = os.path.relpath(local_path, local_directory)
+    s3_path = os.path.join(destination, relative_path)
+    #s3_path = os.path.join(destination, filename)
+    s3_path = s3_path.replace('\\','/')
+    print 's3: ' + s3_path
+
+    # relative_path = os.path.relpath(os.path.join(root, filename))
+    t = threading.Thread(target = upload, args=(local_path, bucket_name, s3_path)).start()
