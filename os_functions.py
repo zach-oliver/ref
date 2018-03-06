@@ -39,5 +39,6 @@ def delete_Files_Not_Folders(folder, log):
           log.append(str(os.path.join(root, file)))
           os.remove(os.path.join(root, file))
 
+#https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
 def get_Current_Working_Directory():
     return str(os.getcwd())

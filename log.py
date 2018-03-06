@@ -51,6 +51,8 @@ class Log:
             f.write(log_line)
             f.write("\n")
     
+    # adds log_line to the end of the file
+    # doesn't handle non-strings
     def append(self, log_line):
         with open(self.loc, "a") as f:
             f.write(log_line)
