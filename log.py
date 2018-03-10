@@ -6,6 +6,8 @@ Created on 12/26/17
 """
 
 import datetime
+import os
+import errno
 
 DEBUG = False
 
@@ -13,7 +15,7 @@ class Log:
     
     def __init__(self, prefix='', log_dir=''):
         #self.loc = LOG_DIR + str(datetime.datetime.now()) + prefix + '.txt'
-        self.loc = prefix + '_' + str(datetime.datetime.now()) + '.txt'
+        self.loc = str(datetime.datetime.now()) + '/' + prefix + '_' + str(datetime.datetime.now()) + '.txt'
         if DEBUG:
             print "log.py --> Log --> self.loc (file name): %s" % self.loc
         
@@ -45,7 +47,8 @@ class Log:
         self.loc = str(self.loc).replace(' ','_')
         print self.loc
         '''
-
+    
+    # can be deprecated as append will create file if it doesn't exist
     def write(self, log_line):
         with open(self.loc, "w") as f:
             f.write(log_line)
@@ -54,6 +57,14 @@ class Log:
     # adds log_line to the end of the file
     # doesn't handle non-strings
     def append(self, log_line):
+        # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+        # creates the directory and any parent directories if it doesn't exist
+        if not os.path.exists(os.path.dirname(self.loc)):
+            try:
+                os.makedirs(os.path.dirname(self.loc))
+            except OSError as exc: # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
         with open(self.loc, "a") as f:
             f.write(log_line)
             f.write("\n")
