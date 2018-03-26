@@ -145,3 +145,23 @@ def df_set_index(df, column):
 def df_format_object_to_date(df, str_column):
     df[str_column] = pd.to_datetime(df[str_column])
     #df[str_column] = pd.to_datetime(df[str_column]).dt.strftime('%Y/%m/%d')
+
+""" replace_null
+replaces null in bed with 0 and returns the data frame
+variables:
+df -- dataframe you want to clean
+field -- name of attirbute you want to replace nulls with 0
+"""
+def df_format_replace_null(df, field):
+    df[field].fillna(0, inplace=True)
+    return df
+
+""" replace_null
+replaces null in bed with 0 and returns the data frame
+variables:
+df -- dataframe you want to clean
+field -- name of attirbute you want to replace nulls with 0
+"""
+def df_format_replace_all_null(df):
+    df.fillna(0, inplace=True)
+    return df

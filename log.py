@@ -6,8 +6,7 @@ Created on 12/26/17
 """
 
 import datetime
-import os
-import errno
+from os_functions import create_Folders_Along_Path
 
 DEBUG = False
 
@@ -57,14 +56,7 @@ class Log:
     # adds log_line to the end of the file
     # doesn't handle non-strings
     def append(self, log_line):
-        # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
-        # creates the directory and any parent directories if it doesn't exist
-        if not os.path.exists(os.path.dirname(self.loc)):
-            try:
-                os.makedirs(os.path.dirname(self.loc))
-            except OSError as exc: # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
+        create_Folders_Along_Path(self.loc)
         with open(self.loc, "a") as f:
             f.write(log_line)
             f.write("\n")

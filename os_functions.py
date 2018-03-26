@@ -6,6 +6,7 @@ Created on 12/28/17
 """
 
 import os, shutil
+import errno
 
 # https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
 def delete_All_In_Folder(folder):
@@ -42,3 +43,13 @@ def delete_Files_Not_Folders(folder, log):
 #https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
 def get_Current_Working_Directory():
     return str(os.getcwd())
+
+def create_Folders_Along_Path(path):
+    # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    # creates the directory and any parent directories if it doesn't exist
+    if not os.path.exists(os.path.dirname(path)):
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
