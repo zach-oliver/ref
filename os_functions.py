@@ -7,6 +7,9 @@ Created on 12/28/17
 
 import os, shutil
 import errno
+import datetime
+
+DEBUG = True
 
 # https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
 def delete_All_In_Folder(folder):
@@ -36,9 +39,16 @@ def delete_Files_Not_Folders(folder, log):
     os.chdir(folder)
     for root, dirs, files in os.walk(".", topdown = False):
        for file in files:
-          print(os.path.join(root, file))
-          log.append(str(os.path.join(root, file)))
-          os.remove(os.path.join(root, file))
+           if DEBUG:
+               print(os.path.join(root, file))
+           log.append(str(os.path.join(root, file)))
+           os.remove(os.path.join(root, file))
+
+def delete_File(filename, log):
+    if DEBUG:
+        print(filename)
+    log.append(filename)
+    os.remove(filename)
 
 #https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
 def get_Current_Working_Directory():
@@ -53,3 +63,19 @@ def create_Folders_Along_Path(path):
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
+                
+def get_Current_Date():
+    return datetime.datetime.now().date().strftime('%Y-%m-%d')
+
+# https://stackoverflow.com/questions/441147/how-to-subtract-a-day-from-a-date
+def get_Current_Date_Minus_Days(days_to_subtract):
+    return (datetime.datetime.now().date() - datetime.timedelta(days=days_to_subtract)).strftime('%Y-%m-%d')
+
+def get_Mod_Date_Time(filename):
+    return os.path.getmtime(filename)
+
+def get_Mod_Date(filename):
+    return datetime.datetime.fromtimestamp(get_Mod_Date_Time(filename)).strftime('%Y-%m-%d')
+
+def evaluate_Mod_Date(filename, minus_days):
+    return (get_Mod_Date(filename) < get_Current_Date_Minus_Days(minus_days))
