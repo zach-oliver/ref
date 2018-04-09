@@ -9,7 +9,7 @@ import os, shutil
 import errno
 import datetime
 
-DEBUG = True
+DEBUG = False
 
 # https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
 def delete_All_In_Folder(folder):
@@ -42,13 +42,25 @@ def delete_Files_Not_Folders(folder, log):
            if DEBUG:
                print(os.path.join(root, file))
            log.append(str(os.path.join(root, file)))
-           os.remove(os.path.join(root, file))
+           # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
+           if os.path.exists(os.path.join(root, file)):
+               os.remove(os.path.join(root, file))
+           else:
+               msg = "file not found"
+               print msg
+               log.append(msg)
 
 def delete_File(filename, log):
     if DEBUG:
         print(filename)
     log.append(filename)
-    os.remove(filename)
+    # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
+    if os.path.exists(filename):
+        os.remove(filename)
+    else:
+        msg = "file not found"
+        print msg
+        log.append(msg)
 
 #https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
 def get_Current_Working_Directory():
@@ -78,4 +90,9 @@ def get_Mod_Date(filename):
     return datetime.datetime.fromtimestamp(get_Mod_Date_Time(filename)).strftime('%Y-%m-%d')
 
 def evaluate_Mod_Date(filename, minus_days):
-    return (get_Mod_Date(filename) < get_Current_Date_Minus_Days(minus_days))
+    # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
+    if os.path.exists(filename):
+        return (get_Mod_Date(filename) < get_Current_Date_Minus_Days(minus_days))
+    else:
+        return True
+
