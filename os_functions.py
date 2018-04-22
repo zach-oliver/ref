@@ -8,6 +8,7 @@ Created on 12/28/17
 import os, shutil
 import errno
 import datetime
+import glob
 
 DEBUG = False
 
@@ -39,14 +40,15 @@ def delete_Files_Not_Folders(folder, log):
     os.chdir(folder)
     for root, dirs, files in os.walk(".", topdown = False):
        for file in files:
+           path = os.path.join(root, file)
            if DEBUG:
-               print(os.path.join(root, file))
-           log.append(str(os.path.join(root, file)))
+               print(path)
+           log.append(str(path))
            # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
-           if os.path.exists(os.path.join(root, file)):
-               os.remove(os.path.join(root, file))
+           if os.path.exists(path):
+               os.remove(path)
            else:
-               msg = "file not found"
+               msg = "delete_File_Not_Folders --> %s: file not found" % path
                print msg
                log.append(msg)
 
@@ -58,13 +60,9 @@ def delete_File(filename, log):
     if os.path.exists(filename):
         os.remove(filename)
     else:
-        msg = "file not found"
+        msg = "delete_File --> %s: file not found" % filename
         print msg
         log.append(msg)
-
-#https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
-def get_Current_Working_Directory():
-    return str(os.getcwd())
 
 def create_Folders_Along_Path(path):
     # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
@@ -75,24 +73,43 @@ def create_Folders_Along_Path(path):
         except OSError as exc: # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
-                
+
+#https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
+def get_Current_Working_Directory():
+    return str(os.getcwd())
+
 def get_Current_Date():
     return datetime.datetime.now().date().strftime('%Y-%m-%d')
+
+def get_Current_Date_Time():
+    return datetime.datetime.now()
 
 # https://stackoverflow.com/questions/441147/how-to-subtract-a-day-from-a-date
 def get_Current_Date_Minus_Days(days_to_subtract):
     return (datetime.datetime.now().date() - datetime.timedelta(days=days_to_subtract)).strftime('%Y-%m-%d')
 
 def get_Mod_Date_Time(filename):
-    return os.path.getmtime(filename)
+    if evaluate_If_File_Exists(filename):
+        return os.path.getmtime(filename)
+    else:
+        return 0
 
 def get_Mod_Date(filename):
     return datetime.datetime.fromtimestamp(get_Mod_Date_Time(filename)).strftime('%Y-%m-%d')
 
+def get_File_List(filename):
+    # example value ('~/folder1/folder2' + '*.png') # * means all. If need specific format then *.csv
+    return glob.glob(filename)
+
 def evaluate_Mod_Date(filename, minus_days):
     # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
-    if os.path.exists(filename):
+    if evaluate_If_File_Exists(filename):
+        # if the mod date of filename is older than today - minus days return True so you know to perform action
+        # if not, false so don't perform an action
         return (get_Mod_Date(filename) < get_Current_Date_Minus_Days(minus_days))
     else:
+        # file not found so perform action
         return True
 
+def evaluate_If_File_Exists(filename):
+    return os.path.isfile(filename)

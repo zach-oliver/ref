@@ -8,6 +8,13 @@ Created on 9/18/17
 import pandas as pd
 
 '''********************************************
+**********************EXPORT*******************
+***********************************************
+'''
+def df_export_csv(df, path, include_index=False):
+    df.to_csv(path, index=include_index)
+
+'''********************************************
 **********************READ*********************
 ***********************************************
 '''
@@ -22,6 +29,9 @@ def df_read_dict(dict):
 def df_read_mongodb(cursor):
     df = pd.DataFrame(list(cursor))
     return df
+
+def df_read_sql(sql, conn):
+    return pd.read_sql_query(sql, conn)
 
 '''********************************************
 *********************PRINT*********************
@@ -95,6 +105,11 @@ def df_change_cell(df, str_index, str_column, value):
 def df_concat(df1, df2, axis=1):
     return pd.concat([df1, df2], axis=1)
 
+# https://www.shanelynn.ie/merge-join-dataframes-python-pandas-index-1/
+# https://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg
+def df_merge(df1, df2):
+    return pd.merge(df1, df2, left_index=True, right_index=True)
+
 '''********************************************
 ********************REMOVE********************
 ***********************************************
@@ -116,17 +131,17 @@ def df_rename_column(df, orig_column, new_column):
 *********************COUNT*********************
 ***********************************************
 '''
-def df_print_index_counts(df, debug=False):
+def df_get_index_counts(df, debug=False):
     if debug:
         print df.value_counts() #always displays highest to lowest
     return df.value_counts()
 
-def df_print_row_count(df, debug=False):
+def df_get_row_count(df, debug=False):
     if debug:
         print df.shape[0]
     return df.shape[0] #gives number of row count
 
-def df_print_column_count(df, debug=False):
+def df_get_column_count(df, debug=False):
     if debug:
         print df.shape[1]
     return df.shape[1] #gives number of column count
@@ -165,3 +180,13 @@ field -- name of attirbute you want to replace nulls with 0
 def df_format_replace_all_null(df):
     df.fillna(0, inplace=True)
     return df
+
+'''********************************************
+********************CREATE*********************
+***********************************************
+'''
+def df_create_df_dict(keys):
+    return {elem : pd.DataFrame for elem in keys}
+
+def df_create_blank_df(df_index, df_columns_list):
+    return pd.DataFrame(index=df_index, columns=df_columns_list)

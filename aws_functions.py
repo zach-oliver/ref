@@ -122,11 +122,12 @@ def delete_S3_Folder_Contents3(s3_resource, bucket_name, folder_name):
     for obj in bucket.objects.filter(Prefix=folder_name):
         objects_to_delete.append({'Key': obj.key})
     
-    bucket.delete_objects(
-        Delete={
-            'Objects': objects_to_delete
-        }
-)
+    if objects_to_delete:
+        bucket.delete_objects(
+                Delete={
+                        'Objects': objects_to_delete
+                        }
+                )
 
 # boto3
 # https://github.com/aws/aws-cli/issues/2603

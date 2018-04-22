@@ -23,7 +23,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 
 from list_functions import list_find, list_append, list_find_minimum_value_index
-from df_functions import df_remove_column_by_index, df_concat, df_print_row_count
+from df_functions import df_remove_column_by_index, df_concat, df_get_row_count
 from dict_functions import dict_get_value
 
 sys.path.insert(0, './')
