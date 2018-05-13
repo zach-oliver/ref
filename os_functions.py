@@ -10,8 +10,6 @@ import errno
 import datetime
 import glob
 
-DEBUG = False
-
 # https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
 def delete_All_In_Folder(folder):
     #folder = '/path/to/folder'
@@ -20,7 +18,7 @@ def delete_All_In_Folder(folder):
         try:
             if os.path.isfile(file_path):
                 os.unlink(file_path)
-            elif os.path.isdir(file_path):
+            elif evaluate_If_Folder_Exists(file_path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print "os_functions.py --> delete_All_In_Folder --> " + str(unicode(e))
@@ -36,23 +34,38 @@ def delete_All_Not_Subfolders(folder):
             print "os_functions.py --> delete_All_In_Folder --> " + str(unicode(e))
 
 # deletes all files within a folder and within its subfolders            
-def delete_Files_Not_Folders(folder, log):     
-    os.chdir(folder)
-    for root, dirs, files in os.walk(".", topdown = False):
-       for file in files:
-           path = os.path.join(root, file)
-           if DEBUG:
-               print(path)
-           log.append(str(path))
-           # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
-           if os.path.exists(path):
-               os.remove(path)
-           else:
-               msg = "delete_File_Not_Folders --> %s: file not found" % path
-               print msg
-               log.append(msg)
+def delete_Files_Not_Folders(folder, log, DEBUG=False):
+    if evaluate_If_Folder_Exists(folder, log):
+        msg = "delete_File_Not_Folders --> %s: Folder EXISTS" % folder
+        if DEBUG:
+            print msg
+        log.append(msg)
+        os.chdir(folder)
+        for root, dirs, files in os.walk(".", topdown = False):
+           for file in files:
+               path = os.path.join(root, file)
+               msg = "delete_File_Not_Folders --> %s FILE FOUND" % path
+               if DEBUG:
+                   print(path)
+               log.append(str(path))
+               # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
+               if os.path.exists(path):
+                   msg = "delete_File_Not_Folders --> %s EXISTS" % path
+                   if DEBUG:
+                       print(path)
+                   log.append(msg)
+                   #os.remove(os.path.join(path, file))
+                   os.remove(path)
+               else:
+                   msg = "delete_File_Not_Folders --> %s: file not found" % path
+                   print msg
+                   log.append(msg)
+    else:
+        msg = "delete_File_Not_Folders --> %s: folder not found" % folder
+        print msg
+        log.append(msg)
 
-def delete_File(filename, log):
+def delete_File(filename, log, DEBUG=True):
     if DEBUG:
         print(filename)
     log.append(filename)
@@ -112,4 +125,12 @@ def evaluate_Mod_Date(filename, minus_days):
         return True
 
 def evaluate_If_File_Exists(filename):
+    filename = os.path.join(get_Current_Working_Directory(), filename)
     return os.path.isfile(filename)
+
+def evaluate_If_Folder_Exists(full_path, log, DEBUG=False):
+    msg = "evaluate_If_Folder_Exists --> full_path: %s" % full_path
+    if DEBUG:
+        print msg
+    log.append(msg)
+    return os.path.isdir(full_path)

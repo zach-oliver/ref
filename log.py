@@ -8,14 +8,13 @@ Created on 12/26/17
 import datetime
 from os_functions import create_Folders_Along_Path
 
-DEBUG = False
-
 class Log:
     
-    def __init__(self, prefix='', log_dir=''):
+    def __init__(self, prefix='', log_dir='', DEBUG=False):
         #self.loc = LOG_DIR + str(datetime.datetime.now()) + prefix + '.txt'
-        self.loc = str(datetime.datetime.now()) + '/' + prefix + '_' + str(datetime.datetime.now()) + '.txt'
-        if DEBUG:
+        self.loc = str(datetime.datetime.now()) + prefix + '/' + prefix + '_' + str(datetime.datetime.now()) + '.txt'
+        self.DEBUG = DEBUG
+        if self.DEBUG:
             print "log.py --> Log --> self.loc (file name): %s" % self.loc
         
         # use the below if you need cwd
@@ -28,7 +27,7 @@ class Log:
         
         self.loc = "%s%s" % (log_dir, self.loc)
 
-        if DEBUG:
+        if self.DEBUG:
             print "log.py --> Log --> self.loc (full path): %s" % self.loc
         
         # windows
@@ -57,6 +56,8 @@ class Log:
     # doesn't handle non-strings
     def append(self, log_line):
         create_Folders_Along_Path(self.loc)
+        if self.DEBUG:
+            print log_line
         with open(self.loc, "a") as f:
             f.write(log_line)
             f.write("\n")

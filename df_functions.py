@@ -6,12 +6,14 @@ Created on 9/18/17
 """
 
 import pandas as pd
+from os_functions import create_Folders_Along_Path
 
 '''********************************************
 **********************EXPORT*******************
 ***********************************************
 '''
 def df_export_csv(df, path, include_index=False):
+    create_Folders_Along_Path(path)
     df.to_csv(path, index=include_index)
 
 '''********************************************
@@ -190,3 +192,10 @@ def df_create_df_dict(keys):
 
 def df_create_blank_df(df_index, df_columns_list):
     return pd.DataFrame(index=df_index, columns=df_columns_list)
+
+'''********************************************
+*********************CHECK*********************
+***********************************************
+'''
+def df_is_empty(df):
+    return df.empty
