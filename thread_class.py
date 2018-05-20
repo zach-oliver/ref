@@ -56,39 +56,39 @@ class Bounded_Semaphore_Thread(Thread):
     def run(self, DEBUG=False):
         wait_start_time = datetime.datetime.now()
         
-        msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> inside run(). waiting: %s" % (self.getName(), str(datetime.datetime.now().time()))
+        msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s -->  waiting: %s" % (self.getName(), str(datetime.datetime.now().time()))
         self.this_log.append(msg)
         
         threadLimiter.acquire()
-        msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> approved. thread locked: %s" % (self.getName(), str(datetime.datetime.now().time()))
+        msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> approved: %s" % (self.getName(), str(datetime.datetime.now().time()))
         self.this_log.append(msg)
         
         wait_finish_time = datetime.datetime.now()
         difference = evaluate_Time_Difference(wait_finish_time, wait_start_time)
-        msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> wait time: %s" % (self.getName(), difference)
+        msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s -------> wait time: %s" % (self.getName(), difference)
         self.this_log.append(msg)
         try:
             run_start_time = datetime.datetime.now()
             
-            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> running: %s" % (self.getName(), str(datetime.datetime.now().time()))
+            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s -->  running: %s" % (self.getName(), str(datetime.datetime.now().time()))
             self.this_log.append(msg)
             # http://www.pythonforbeginners.com/super/working-python-super-function
             super(Bounded_Semaphore_Thread, self).run()
         finally:
-            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> completed %s" % (self.getName(), str(datetime.datetime.now().time()))
+            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s -> completed: %s" % (self.getName(), str(datetime.datetime.now().time()))
             self.this_log.append(msg)
             
             run_finish_time = datetime.datetime.now()
             difference = evaluate_Time_Difference(run_finish_time, run_start_time)
-            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> run time: %s" % (self.getName(), difference)
+            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --------> run time: %s" % (self.getName(), difference)
             self.this_log.append(msg)
             
             difference = evaluate_Time_Difference(run_finish_time, wait_start_time)
-            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> total time: %s" % (self.getName(), difference)
+            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s ------> total time: %s" % (self.getName(), difference)
             print msg
             self.this_log.append(msg)
             
             threadLimiter.release()
-            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> thread lock released: %s" % (self.getName(), str(datetime.datetime.now().time()))
+            msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> released: %s" % (self.getName(), str(datetime.datetime.now().time()))
             self.this_log.append(msg)
 
