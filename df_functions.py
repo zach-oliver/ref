@@ -6,7 +6,7 @@ Created on 9/18/17
 """
 
 import pandas as pd
-from os_functions import create_Folders_Along_Path
+from os_functions import create_Folders_Along_Path, evaluate_If_File_Exists
 
 '''********************************************
 **********************EXPORT*******************
@@ -20,9 +20,12 @@ def df_export_csv(df, path, include_index=False):
 **********************READ*********************
 ***********************************************
 '''
-def df_read_csv(path):
-    df = pd.read_csv(path)
-    return df
+def df_read_csv(relative_path):
+    if evaluate_If_File_Exists(relative_path):
+        df = pd.read_csv(relative_path)
+        return df
+    else:
+        return None
 
 def df_read_dict(dict):
     df = pd.DataFrame.from_dict(dict)

@@ -6,12 +6,13 @@ Created on 11/16/17
 """
 
 import os
-# http://ls.pwd.io/2013/06/parallel-s3-uploads-using-boto-and-threads-in-python/
-import threading
 
 # https://docs.python.org/2/library/mimetypes.html
 # used to designate the content type on S3 upload due to download vs render issue
 import mimetypes
+
+from os_functions import create_Folders_Along_Path
+from thread_class import Bounded_Semaphore_Thread
 
 DEBUG = False
 
@@ -31,7 +32,7 @@ def delete_S3_Contents(bucket, log=False):
             print key
         if log:
             log.append(str(key))
-        threads.append(threading.Thread(target = key.delete))
+        threads.append(Bounded_Semaphore_Thread(key.delete, name=("delete_S3_Contents:%s" % str(key))))
     
     # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
     for t in threads:
@@ -56,7 +57,7 @@ def upload_To_S3_From_S3(dest_bucket, source_bucket, log=False):
             print obj.key
         #if log:
             #log.append(str(obj.key))
-        threads.append(threading.Thread(target = dest_bucket.copy_key, args=(obj.key, source_bucket.name, obj.key)))
+        threads.append(Bounded_Semaphore_Thread(dest_bucket.copy_key, name=("upload_To_S3_From_S3:%s" % str(obj.key)), args=(obj.key, source_bucket.name, obj.key)))
         
     # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
     for t in threads:
@@ -81,7 +82,7 @@ def upload_File_To_S3_From_Local(boto3_client, local_path, bucket_name, s3_path)
     boto3_client.upload_file(local_path, bucket_name, s3_path, ExtraArgs={'ContentType': mimetypes.guess_type(local_path)[0]})
 
 # boto3
-def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client, bucket_name):
+def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client, bucket_name, DEBUG=False):
     threads = []
     # enumerate local files recursively
     # https://gist.github.com/feelinc/d1f541af4f31d09a2ec3
@@ -89,17 +90,19 @@ def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client
         for filename in files:
             # construct the full local path
             local_path = os.path.join(root, filename)
-            print 'local: ' + local_path
+            if DEBUG:
+                print 'local: ' + local_path
         
             relative_path = os.path.relpath(local_path, local_directory)
             s3_path = os.path.join(destination, relative_path)
             #s3_path = os.path.join(destination, filename)
             s3_path = s3_path.replace('\\','/')
-            print 's3: ' + s3_path
+            if DEBUG:
+                print 's3: ' + s3_path
         
             # relative_path = os.path.relpath(os.path.join(root, filename))
             #upload_File_To_S3_From_Local(boto3_client, local_path, bucket_name, s3_path)
-            threads.append(threading.Thread(target = upload_File_To_S3_From_Local, args=(boto3_client, local_path, bucket_name, s3_path)))
+            threads.append(Bounded_Semaphore_Thread(upload_File_To_S3_From_Local, name=("upload_Directory_To_S3_From_Local:%s" % str(filename)), args=(boto3_client, local_path, bucket_name, s3_path)))
     
     # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
     for t in threads:
@@ -119,10 +122,24 @@ def delete_S3_Folder_Contents3(s3_resource, bucket_name, folder_name):
     bucket = s3_resource.Bucket(bucket_name)
     
     objects_to_delete = []
+    some_objects_to_delete = []
     for obj in bucket.objects.filter(Prefix=folder_name):
         objects_to_delete.append({'Key': obj.key})
     
-    if objects_to_delete:
+    if len(objects_to_delete) > 1000:
+        for i in range(0,1000):
+            some_objects_to_delete.append(objects_to_delete.pop(0))
+        bucket.delete_objects(
+                Delete={
+                        'Objects': objects_to_delete
+                        }
+                )
+        bucket.delete_objects(
+                Delete={
+                        'Objects': some_objects_to_delete
+                        }
+                )
+    elif objects_to_delete:
         bucket.delete_objects(
                 Delete={
                         'Objects': objects_to_delete
@@ -134,3 +151,70 @@ def delete_S3_Folder_Contents3(s3_resource, bucket_name, folder_name):
 def create_S3_Bucket(boto3_client, bucket_name, bucket_region):
     #s3 = boto3.client('s3')
     boto3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': bucket_region})
+
+# https://stackoverflow.com/questions/31918960/boto3-to-download-all-files-from-a-s3-bucket/31929277
+def download_S3_Bucket(boto3_client, str_bucket_name, str_bucket_path, str_local_relative_target):
+    """
+    Downloads recursively the given S3 path to the target directory.
+    :param client: S3 client to use.
+    :param bucket: the name of the bucket to download from
+    :param path: The S3 directory to download.
+    :param target: the local directory to download the files to.
+    """
+
+    # Handle missing / at end of prefix
+    if not str_bucket_path.endswith('/'):
+        str_bucket_path += '/'
+
+    paginator = boto3_client.get_paginator('list_objects_v2')
+    for result in paginator.paginate(Bucket=str_bucket_name, Prefix=str_bucket_path):
+        # Download each file individually
+        for key in result['Contents']:
+            # Calculate relative path
+            rel_path = key['Key'][len(str_bucket_path):]
+            # Skip paths ending in /
+            if not key['Key'].endswith('/'):
+                local_file_path = os.path.join(str_local_relative_target, rel_path)
+                # Make sure directories exist
+                local_file_dir = os.path.dirname(local_file_path)
+                create_Folders_Along_Path(local_file_dir)
+                boto3_client.download_file(str_bucket_name, key['Key'], local_file_path)
+
+# https://github.com/boto/boto3/issues/358
+# https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
+from awscli.clidriver import create_clidriver
+
+def aws_cli(*cmd):
+    old_env = dict(os.environ)
+    try:
+
+        # Environment
+        env = os.environ.copy()
+        env['LC_CTYPE'] = u'en_US.UTF'
+        os.environ.update(env)
+        
+        # Run awscli in the same process
+        exit_code = create_clidriver().main(*cmd)
+
+        # Deal with problems
+        if exit_code > 0:
+            raise RuntimeError('AWS CLI exited with code {}'.format(exit_code))
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
+
+# FROM_LOCAL_SOURCE: Used to designate whether you want to sync from the local source to S3 or from S3 to local
+def sync_S3_Bucket(str_full_source_path, str_bucket_name, str_bucket_path, FROM_LOCAL_SOURCE=True):
+    command = ''
+    if FROM_LOCAL_SOURCE:
+        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path), '--delete']
+        for c in commands:
+            command = command + c + " "
+        print command
+        aws_cli(commands)
+    else:
+        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path, '--delete']
+        for c in commands:
+            command = command + c + " "
+        print command
+        aws_cli(commands)

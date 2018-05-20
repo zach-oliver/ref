@@ -65,7 +65,7 @@ def delete_Files_Not_Folders(folder, log, DEBUG=False):
         print msg
         log.append(msg)
 
-def delete_File(filename, log, DEBUG=True):
+def delete_File(filename, log, DEBUG=False):
     if DEBUG:
         print(filename)
     log.append(filename)
@@ -74,7 +74,6 @@ def delete_File(filename, log, DEBUG=True):
         os.remove(filename)
     else:
         msg = "delete_File --> %s: file not found" % filename
-        print msg
         log.append(msg)
 
 def create_Folders_Along_Path(path):
@@ -124,9 +123,9 @@ def evaluate_Mod_Date(filename, minus_days):
         # file not found so perform action
         return True
 
-def evaluate_If_File_Exists(filename):
-    filename = os.path.join(get_Current_Working_Directory(), filename)
-    return os.path.isfile(filename)
+def evaluate_If_File_Exists(relative_filename):
+    full_path = os.path.join(get_Current_Working_Directory(), relative_filename)
+    return os.path.isfile(full_path)
 
 def evaluate_If_Folder_Exists(full_path, log, DEBUG=False):
     msg = "evaluate_If_Folder_Exists --> full_path: %s" % full_path
@@ -134,3 +133,17 @@ def evaluate_If_Folder_Exists(full_path, log, DEBUG=False):
         print msg
     log.append(msg)
     return os.path.isdir(full_path)
+
+# https://stackoverflow.com/questions/1345827/how-do-i-find-the-time-difference-between-two-datetime-objects-in-python
+def evaluate_Time_Difference(later_time, earlier_time, DEBUG=False):
+    duration = later_time - earlier_time                         # For build-in functions
+    duration_in_s = duration.total_seconds()
+    days    = divmod(duration_in_s, 86400)        # Get days (without [0]!)
+    hours   = divmod(days[1], 3600)               # Use remainder of days to calc hours
+    minutes = divmod(hours[1], 60)                # Use remainder of hours to calc minutes
+    seconds = divmod(minutes[1], 1)               # Use remainder of minutes to calc seconds
+    microseconds = duration.microseconds
+    time = "%d:%d:%d:%d.%d" % (days[0], hours[0], minutes[0], seconds[0], microseconds)
+    if DEBUG:
+        print time
+    return time

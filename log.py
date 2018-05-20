@@ -12,7 +12,8 @@ class Log:
     
     def __init__(self, prefix='', log_dir='', DEBUG=False):
         #self.loc = LOG_DIR + str(datetime.datetime.now()) + prefix + '.txt'
-        self.loc = str(datetime.datetime.now()) + prefix + '/' + prefix + '_' + str(datetime.datetime.now()) + '.txt'
+        #self.loc = str(datetime.datetime.now()) + prefix + '/' + prefix + '_' + str(datetime.datetime.now()) + '.txt'
+        self.loc = str(datetime.datetime.now()) + prefix + '.txt'
         self.DEBUG = DEBUG
         if self.DEBUG:
             print "log.py --> Log --> self.loc (file name): %s" % self.loc
