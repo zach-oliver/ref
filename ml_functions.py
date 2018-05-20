@@ -306,6 +306,7 @@ def ml_time_plot_multiple_y(df, df2, str_title=''):
 def ml_save_plot(plot, str_path):
     figure = plot.get_figure()
     figure.savefig(str_path, format='png', dpi=400)
+    # https://stackoverflow.com/questions/21884271/warning-about-too-many-open-figures
     plt.close(figure)
 
 '''********************************************
