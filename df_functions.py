@@ -20,9 +20,9 @@ def df_export_csv(df, path, include_index=False):
 **********************READ*********************
 ***********************************************
 '''
-def df_read_csv(relative_path):
+def df_read_csv(relative_path, index_col=0):
     if evaluate_If_File_Exists(relative_path):
-        df = pd.read_csv(relative_path)
+        df = pd.read_csv(relative_path, index_col=0)
         return df
     else:
         return None
@@ -94,6 +94,12 @@ def df_get_rows_where_column_equals_value(df, column, value):
 
 def df_get_random_sample(df,size):
     return df.sample(n=size, random_state=1)
+
+def df_get_indexes(df):
+    return df.index.values
+
+def df_get_cell(df, str_index, str_column):
+    return df.at[str_index, str_column]
 
 '''********************************************
 ********************CHANGE********************

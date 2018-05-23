@@ -12,9 +12,13 @@ from os_functions import evaluate_Time_Difference
 
 from threading import BoundedSemaphore, Thread
 import datetime
+import time
 
 import multiprocessing
 
+# Used to slow down the processing of a batch of threads since I assume that there can only be so many
+#           waiting at one time? Could eventually be a machine learning algorithm?
+THREADING_SLEEP = 6
 
 # Used by all threading instances to set the maximum number of threads which can run concurrently within the semaphore
 # Assumption: Current Macbook has 2 CPU and 2 threads per CPU so 4 threads available although 1 will always be 
@@ -92,3 +96,13 @@ class Bounded_Semaphore_Thread(Thread):
             msg = "thread_class.py --> Bounded_Semaphore_Thread --> %s --> released: %s" % (self.getName(), str(datetime.datetime.now().time()))
             self.this_log.append(msg)
 
+def start_Managed_Threads(list_threads):
+    i = 0
+    for t in list_threads:
+        t.start()
+        t.join()
+        i += 1
+        # https://stackoverflow.com/questions/24409861/tell-python-to-wait-pause-a-for-loop
+        if i % 5 == 0:
+            #raw_input("Press Enter to continue...")
+            time.sleep(THREADING_SLEEP)
