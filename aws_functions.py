@@ -218,3 +218,7 @@ def sync_S3_Bucket(str_full_source_path, str_bucket_name, str_bucket_path, FROM_
             command = command + c + " "
         print command
         aws_cli(commands)
+
+def sync_S3_Bucket_From_S3_Bucket(str_source_bucket_name, str_source_bucket_path, str_dest_bucket_name, str_dest_bucket_path):
+    commands = ['s3', 'sync', 's3://%s/%s' % (str_source_bucket_name, str_source_bucket_path), 's3://%s/%s' % (str_dest_bucket_name, str_dest_bucket_path), '--delete']
+    aws_cli(commands)
