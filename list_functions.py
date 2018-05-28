@@ -50,3 +50,10 @@ def list_replace_all(list, original, new):
     for index, item in enumerate(list):
         if item == original:
             list[index] = new
+
+'''********************************************
+*********************REPLACE*******************
+***********************************************
+'''
+def list_create_list_dict(keys):
+    return {elem : [] for elem in keys}

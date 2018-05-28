@@ -101,6 +101,9 @@ def df_get_indexes(df):
 def df_get_cell(df, str_index, str_column):
     return df.at[str_index, str_column]
 
+def df_get_list_of_list(df):
+    return df.values.tolist()
+
 '''********************************************
 ********************CHANGE********************
 ***********************************************
