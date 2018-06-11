@@ -100,38 +100,40 @@ def get_Current_Date_Time():
 def get_Current_Date_Minus_Days(days_to_subtract):
     return (datetime.datetime.now().date() - datetime.timedelta(days=days_to_subtract)).strftime('%Y-%m-%d')
 
-def get_Mod_Date_Time(filename):
-    if evaluate_If_File_Exists(filename):
+def get_Mod_Date_Time(filename, log):
+    if evaluate_If_File_Exists(filename, log):
         return os.path.getmtime(filename)
     else:
         return 0
 
-def get_Mod_Date(filename):
-    return datetime.datetime.fromtimestamp(get_Mod_Date_Time(filename)).strftime('%Y-%m-%d')
+def get_Mod_Date(filename, log):
+    return datetime.datetime.fromtimestamp(get_Mod_Date_Time(filename, log)).strftime('%Y-%m-%d')
 
 def get_File_List(filename):
     # example value ('~/folder1/folder2' + '*.png') # * means all. If need specific format then *.csv
     return glob.glob(filename)
 
-def evaluate_Mod_Date(filename, minus_days):
+def evaluate_Mod_Date(filename, minus_days, log):
     # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
-    if evaluate_If_File_Exists(filename):
+    if evaluate_If_File_Exists(filename, log):
         # if the mod date of filename is older than today - minus days return True so you know to perform action
         # if not, false so don't perform an action
-        return (get_Mod_Date(filename) < get_Current_Date_Minus_Days(minus_days))
+        return (get_Mod_Date(filename, log) < get_Current_Date_Minus_Days(minus_days))
     else:
         # file not found so perform action
         return True
 
-def evaluate_If_File_Exists(relative_filename):
+def evaluate_If_File_Exists(relative_filename, DEBUG=True):
     full_path = os.path.join(get_Current_Working_Directory(), relative_filename)
+    if DEBUG:
+        print "evaluate_If_File_Exists --> full_path: %s" % full_path
+        print os.path.isfile(full_path)
     return os.path.isfile(full_path)
 
-def evaluate_If_Folder_Exists(full_path, log, DEBUG=False):
-    msg = "evaluate_If_Folder_Exists --> full_path: %s" % full_path
+def evaluate_If_Folder_Exists(full_path, DEBUG=True):
     if DEBUG:
-        print msg
-    log.append(msg)
+        print "evaluate_If_Folder_Exists --> full_path: %s" % full_path
+        print os.path.isdir(full_path)
     return os.path.isdir(full_path)
 
 # https://stackoverflow.com/questions/1345827/how-do-i-find-the-time-difference-between-two-datetime-objects-in-python
