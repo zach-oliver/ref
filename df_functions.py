@@ -205,6 +205,9 @@ def df_create_df_dict(keys):
 def df_create_blank_df(df_index, df_columns_list):
     return pd.DataFrame(index=df_index, columns=df_columns_list)
 
+def df_create_blank():
+    return pd.DataFrame({'A' : []})
+
 '''********************************************
 *********************CHECK*********************
 ***********************************************
