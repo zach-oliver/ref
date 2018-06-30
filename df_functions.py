@@ -134,6 +134,18 @@ def df_remove_column(df, column):
 def df_remove_column_by_index(df, index):
     return df.drop(df.columns[index], axis=1, inplace=True)
 
+# https://stackoverflow.com/questions/18172851/deleting-dataframe-row-in-pandas-based-on-column-value
+def df_remove_row_by_query(df, str_query):
+    return df.query(str_query)
+
+def df_remove_row_by_value(df, str_column, value):
+    return df[df[str_column] != value]
+
+def df_remove_row_by_values(df, str_column, values):
+    for v in values:
+        df = df[df[str_column] != v]
+    return df
+
 '''********************************************
 ********************RENAME********************
 ***********************************************

@@ -35,6 +35,7 @@ def delete_All_Not_Subfolders(folder):
 
 # deletes all files within a folder and within its subfolders            
 def delete_Files_Not_Folders(folder, log, DEBUG=False):
+    cwd = get_Current_Working_Directory()
     if evaluate_If_Folder_Exists(folder, log):
         msg = "delete_File_Not_Folders --> %s: Folder EXISTS" % folder
         if DEBUG:
@@ -60,6 +61,8 @@ def delete_Files_Not_Folders(folder, log, DEBUG=False):
                    msg = "delete_File_Not_Folders --> %s: file not found" % path
                    print msg
                    log.append(msg)
+        # change the folder back to the original CWD after crawling the folder
+        os.chdir(cwd)
     else:
         msg = "delete_File_Not_Folders --> %s: folder not found" % folder
         print msg
