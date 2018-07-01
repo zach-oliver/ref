@@ -180,6 +180,14 @@ def df_set_index(df, column):
     df.set_index([column], inplace=True) #always displays highest to lowest
 
 '''********************************************
+*********************SORT**********************
+***********************************************
+'''
+# https://stackoverflow.com/questions/22211737/python-pandas-how-to-sort-dataframe-by-index
+def df_sort_by_index(df):
+    df.sort_index(inplace=True)
+
+'''********************************************
 ********************FORMAT*********************
 ***********************************************
 '''
