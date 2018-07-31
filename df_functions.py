@@ -95,11 +95,18 @@ def df_get_rows_where_column_equals_value(df, column, value):
 def df_get_random_sample(df,size):
     return df.sample(n=size, random_state=1)
 
-def df_get_indexes(df):
+# AS_TYPE: https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.dtype.html#numpy.dtype
+# https://pandas.pydata.org/pandas-docs/stable/generated/pandas.Index.astype.html#pandas.Index.astype
+def df_get_indexes(df, AS_TYPE=False):
+    if AS_TYPE:
+        return df.index.astype(AS_TYPE)
     return df.index.values
 
 def df_get_cell(df, str_index, str_column):
     return df.at[str_index, str_column]
+
+def df_get_list_from_column(df, column):
+    return df[column].tolist()
 
 def df_get_list_of_list(df):
     return df.values.tolist()
