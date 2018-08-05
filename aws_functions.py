@@ -207,7 +207,7 @@ def aws_cli(*cmd):
 def sync_S3_Bucket_With_Local_Dir(str_full_source_path, str_bucket_name, str_bucket_path, FROM_LOCAL_SOURCE=True, DELETE_DIFFERENCES=False):
     command = ''
     if FROM_LOCAL_SOURCE:
-        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path)]
+        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path), '--exact-timestamps']
         if DELETE_DIFFERENCES:
             commands.append('--delete')
         
@@ -218,7 +218,7 @@ def sync_S3_Bucket_With_Local_Dir(str_full_source_path, str_bucket_name, str_buc
         
         aws_cli(commands)
     else:
-        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path]
+        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path, '--exact-timestamps']
         if DELETE_DIFFERENCES:
             commands.append('--delete')
         
@@ -230,7 +230,7 @@ def sync_S3_Bucket_With_Local_Dir(str_full_source_path, str_bucket_name, str_buc
         aws_cli(commands)
 
 def sync_S3_Bucket_With_S3_Bucket(str_source_bucket_name, str_source_bucket_path, str_dest_bucket_name, str_dest_bucket_path, DELETE_DIFFERENCES=False):
-    commands = ['s3', 'sync', 's3://%s/%s' % (str_source_bucket_name, str_source_bucket_path), 's3://%s/%s' % (str_dest_bucket_name, str_dest_bucket_path)]
+    commands = ['s3', 'sync', 's3://%s/%s' % (str_source_bucket_name, str_source_bucket_path), 's3://%s/%s' % (str_dest_bucket_name, str_dest_bucket_path), '--exact-timestamps']
     if DELETE_DIFFERENCES:
         commands.append('--delete')
     
