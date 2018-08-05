@@ -204,21 +204,40 @@ def aws_cli(*cmd):
         os.environ.update(old_env)
 
 # FROM_LOCAL_SOURCE: Used to designate whether you want to sync from the local source to S3 or from S3 to local
-def sync_S3_Bucket(str_full_source_path, str_bucket_name, str_bucket_path, FROM_LOCAL_SOURCE=True):
+def sync_S3_Bucket_With_Local_Dir(str_full_source_path, str_bucket_name, str_bucket_path, FROM_LOCAL_SOURCE=True, DELETE_DIFFERENCES=False):
     command = ''
     if FROM_LOCAL_SOURCE:
-        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path), '--delete']
+        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path)]
+        if DELETE_DIFFERENCES:
+            commands.append('--delete')
+        
+        # print the command
         for c in commands:
             command = command + c + " "
         print command
+        
         aws_cli(commands)
     else:
-        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path, '--delete']
+        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path]
+        if DELETE_DIFFERENCES:
+            commands.append('--delete')
+        
+        # print the command
         for c in commands:
             command = command + c + " "
         print command
+        
         aws_cli(commands)
 
-def sync_S3_Bucket_From_S3_Bucket(str_source_bucket_name, str_source_bucket_path, str_dest_bucket_name, str_dest_bucket_path):
-    commands = ['s3', 'sync', 's3://%s/%s' % (str_source_bucket_name, str_source_bucket_path), 's3://%s/%s' % (str_dest_bucket_name, str_dest_bucket_path), '--delete']
+def sync_S3_Bucket_With_S3_Bucket(str_source_bucket_name, str_source_bucket_path, str_dest_bucket_name, str_dest_bucket_path, DELETE_DIFFERENCES=False):
+    commands = ['s3', 'sync', 's3://%s/%s' % (str_source_bucket_name, str_source_bucket_path), 's3://%s/%s' % (str_dest_bucket_name, str_dest_bucket_path)]
+    if DELETE_DIFFERENCES:
+        commands.append('--delete')
+    
+    # print the command
+    command = ''
+    for c in commands:
+        command = command + c + " "
+    print command
+    
     aws_cli(commands)
