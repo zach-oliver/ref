@@ -241,3 +241,11 @@ def df_create_blank():
 '''
 def df_is_empty(df):
     return df.empty
+
+'''********************************************
+*********************SEARCH*********************
+***********************************************
+'''
+# https://stackoverflow.com/questions/23549231/check-if-a-value-exists-in-pandas-dataframe-index
+def df_search_indexes(df, value):
+    return value in df.index
