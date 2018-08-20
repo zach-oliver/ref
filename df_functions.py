@@ -194,6 +194,10 @@ def df_set_index(df, column):
 def df_sort_by_index(df):
     df.sort_index(inplace=True)
 
+# http://cmdlinetips.com/2018/02/how-to-sort-pandas-dataframe-by-columns-and-row/
+def df_sort_by_column(df, str_column, sort_ascending=False):
+    df.sort_values(str_column, ascending=sort_ascending, inplace=True)
+
 '''********************************************
 ********************FORMAT*********************
 ***********************************************
