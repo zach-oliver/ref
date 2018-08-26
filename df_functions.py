@@ -212,9 +212,12 @@ variables:
 df -- dataframe you want to clean
 field -- name of attirbute you want to replace nulls with 0
 """
-def df_format_replace_null(df, field):
-    df[field].fillna(0, inplace=True)
-    return df
+def df_format_replace_null(df, field, inPlace=True):
+    if (inPlace):
+        df[field].fillna(0, inplace=inPlace)
+    else:
+        df_new = df[field].fillna(0, inplace=inPlace)
+        return df_new
 
 """ replace_null
 replaces null in bed with 0 and returns the data frame
