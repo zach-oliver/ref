@@ -35,6 +35,7 @@ def df_read_mongodb(cursor):
     df = pd.DataFrame(list(cursor))
     return df
 
+# issue: if there are any comments in the sql file this will not read
 def df_read_sql(sql, conn):
     return pd.read_sql_query(sql, conn)
 
