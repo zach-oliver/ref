@@ -204,10 +204,11 @@ def aws_cli(*cmd):
         os.environ.update(old_env)
 
 # FROM_LOCAL_SOURCE: Used to designate whether you want to sync from the local source to S3 or from S3 to local
+# issue: --exact-timestamps didn't work as expected: https://github.com/aws/aws-cli/issues/2000
 def sync_S3_Bucket_With_Local_Dir(str_full_source_path, str_bucket_name, str_bucket_path, FROM_LOCAL_SOURCE=True, DELETE_DIFFERENCES=False):
     command = ''
     if FROM_LOCAL_SOURCE:
-        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path), '--exact-timestamps']
+        commands = ['s3', 'sync', str_full_source_path, 's3://%s/%s' % (str_bucket_name, str_bucket_path)]
         if DELETE_DIFFERENCES:
             commands.append('--delete')
         
@@ -218,7 +219,7 @@ def sync_S3_Bucket_With_Local_Dir(str_full_source_path, str_bucket_name, str_buc
         
         aws_cli(commands)
     else:
-        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path, '--exact-timestamps']
+        commands = ['s3', 'sync', 's3://%s/%s' % (str_bucket_name, str_bucket_path), str_full_source_path]
         if DELETE_DIFFERENCES:
             commands.append('--delete')
         
