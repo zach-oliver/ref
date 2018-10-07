@@ -169,3 +169,10 @@ def evaluate_Time_Difference(later_time, earlier_time, DEBUG=False):
     if DEBUG:
         print time
     return time
+
+# https://stackoverflow.com/questions/5914627/prepend-line-to-beginning-of-a-file
+def file_Line_Prepender(filename_str, line_str):
+    with open(filename_str, 'r+') as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write(line_str.rstrip('\r\n') + '\n' + content)
