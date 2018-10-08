@@ -23,9 +23,11 @@ def df_export_csv(df, path, include_index=False):
 def df_read_csv(relative_path, index_col=0):
     if evaluate_If_File_Exists(relative_path):
         df = pd.read_csv(relative_path, index_col=0)
+        if df_is_empty(df):
+            return False
         return df
     else:
-        return None
+        return False
 
 def df_read_dict(dict):
     df = pd.DataFrame.from_dict(dict)
