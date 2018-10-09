@@ -126,8 +126,9 @@ def df_change_cell(df, str_index, str_column, value):
 ***********************************************
 '''
 #place the dfs on top of each other with axis=0
-def df_concat(df1, df2, axis=1):
-    return pd.concat([df1, df2], axis=1)
+# https://stackoverflow.com/questions/50501787/python-pandas-user-warning
+def df_concat(df1, df2, AXIS=1, SORT=True):
+    return pd.concat([df1, df2], axis=AXIS, sort=SORT)
 
 # https://www.shanelynn.ie/merge-join-dataframes-python-pandas-index-1/
 # https://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg
