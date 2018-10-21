@@ -20,9 +20,9 @@ def df_export_csv(df, path, include_index=False):
 **********************READ*********************
 ***********************************************
 '''
-def df_read_csv(relative_path, index_col=0):
+def df_read_csv(relative_path, DF_INDEX_CSV_COLUMN_NUMBER=0):
     if evaluate_If_File_Exists(relative_path):
-        df = pd.read_csv(relative_path, index_col=0)
+        df = pd.read_csv(relative_path, index_col=DF_INDEX_CSV_COLUMN_NUMBER)
         if df_is_empty(df):
             return False
         return df
@@ -231,7 +231,6 @@ field -- name of attirbute you want to replace nulls with 0
 """
 def df_format_replace_all_null(df):
     df.fillna(0, inplace=True)
-    return df
 
 '''********************************************
 ********************CREATE*********************
