@@ -94,6 +94,11 @@ def create_Folders_Along_Path(path):
 def get_Current_Working_Directory():
     return str(os.getcwd())
 
+def join_With_Current_Working_Directory(str_local_dir):
+    full_path = os.path.join(get_Current_Working_Directory(), str_local_dir)
+    #return '%s%s' % (str(os.getcwd()), str_local_dir)
+    return full_path
+
 def get_Current_Date():
     return datetime.datetime.now().date().strftime('%Y-%m-%d')
 
@@ -136,7 +141,7 @@ def evaluate_Mod_Date(filename, minus_days):
         return True
 
 def evaluate_If_File_Exists(relative_filename, DEBUG=False):
-    full_path = os.path.join(get_Current_Working_Directory(), relative_filename)
+    full_path = join_With_Current_Working_Directory(relative_filename)
     if DEBUG:
         print "evaluate_If_File_Exists --> full_path: %s" % full_path
         print os.path.isfile(full_path)
