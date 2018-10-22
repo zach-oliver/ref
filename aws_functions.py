@@ -14,75 +14,93 @@ import mimetypes
 from os_functions import create_Folders_Along_Path
 from thread_class import Bounded_Semaphore_Thread
 
-DEBUG = False
-
-'''
-
-BOTO FUNCTIONS
-
-
-'''
-
-# https://stackoverflow.com/questions/11426560/amazon-s3-boto-how-to-delete-folder
-# boto
-def delete_S3_Contents(bucket, log=False):
-    threads = []
-    for key in bucket.list():
-        if DEBUG:
-            print key
-        if log:
-            log.append(str(key))
-        threads.append(Bounded_Semaphore_Thread(key.delete, name=("delete_S3_Contents:%s" % str(key))))
     
-    # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-
-# https://stackoverflow.com/questions/11426560/amazon-s3-boto-how-to-delete-folder
-# boto
-def delete_S3_Folder_Contents(bucket, folder):
-    for key in bucket.list(prefix=folder):
-        print key
-        key.delete()
-
-# https://stackoverflow.com/questions/47468148/how-to-copy-s3-object-from-one-bucket-to-another-using-python-boto3
-# https://stackoverflow.com/questions/30249069/listing-contents-of-a-bucket-with-boto3
-# boto
-def upload_To_S3_From_S3(dest_bucket, source_bucket, log=False):
-    threads = []
-    for obj in source_bucket.list():
-        if DEBUG:
-            print obj.key
-        #if log:
-            #log.append(str(obj.key))
-        threads.append(Bounded_Semaphore_Thread(dest_bucket.copy_key, name=("upload_To_S3_From_S3:%s" % str(obj.key)), args=(obj.key, source_bucket.name, obj.key)))
-        
-    # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-        
 '''
 
 BOTO 3 FUNCTIONS
 
 
 '''
+import boto3
+import botocore
 
-# boto3
+'''
+
+CLIENT
+
+
+'''
+
+def create_Boto_Client(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY):
+    client = boto3.client(
+        's3',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+    return client
+
+'''
+
+SESSION
+
+
+'''
+
+def create_Boto_Session(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY):
+    session = boto3.Session(
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+    return session
+
+'''
+
+S3
+
+
+'''
+
+# ************
+# UPLOAD
+# ************
+
 # https://stackoverflow.com/questions/18296875/amazon-s3-downloads-index-html-instead-of-serving
 # https://acloud.guru/forums/serverless-portfolio-with-react/discussion/-KyHqzSIDNFvxfb1Yz1D/S3%20is%20serving%20a%20download%20of%20my%20index.html%20instead%20of%20displaying%20it%20in%20the%20browser
 # https://github.com/robin-acloud/my-portfolio/commit/61ce4cb2d8a5754912b677fa996771a8e7f58d56
-def upload_File_To_S3_From_Local(boto3_client, local_path, bucket_name, s3_path):
+def upload_File_To_S3_From_Local(str_bucket_name, str_local_dir, str_bucket_object_key, DEBUG=True):
     if DEBUG:
-        print str(mimetypes.guess_type(local_path)[0])
-    boto3_client.upload_file(local_path, bucket_name, s3_path, ExtraArgs={'ContentType': mimetypes.guess_type(local_path)[0]})
+        print 'aws_functions.py --> upload_File_To_S3: START'
+        print 'str_bucket_name=%s' % (str(str_bucket_name))
+        print 'str_local_dir=%s' % (str(str_local_dir))
+        print 'str_local_dir type is %s' % (str(mimetypes.guess_type(str_local_dir)[0]))
+        print 'str_bucket_object_key=%s' % (str(str_bucket_object_key))
+    
+    s3_bucket = boto3.resource('s3').Bucket(str_bucket_name)
+    
+    if DEBUG:
+        print 'aws_functions.py --> upload_File_To_S3: s3 BUCKET CREATED'
+    try:
+        s3_bucket.upload_file(str_local_dir, str_bucket_object_key, ExtraArgs={'ContentType': mimetypes.guess_type(str_local_dir)[0]})
+    except botocore.exceptions.ClientError as e:
+        #
+        #
+        # NEED BETTER ERROR HANDLING
+        #
+        #
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+            return False
+        else:
+            raise
+            return False
+        
+    if DEBUG:
+        print 'aws_functions.py --> upload_File_To_S3: s3 BUCKET OBJECT CREATED'
+        print 'aws_functions.py --> upload_File_To_S3: FINISH'
+    
+    return True
 
-# boto3
-def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client, bucket_name, DEBUG=False):
+def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client, bucket_name, DEBUG=True):
     threads = []
     # enumerate local files recursively
     # https://gist.github.com/feelinc/d1f541af4f31d09a2ec3
@@ -110,11 +128,38 @@ def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client
     for t in threads:
         t.join()
 
-# boto3
+# ************
+# DELETE
+# ************
+
 # https://stackoverflow.com/questions/3140779/how-to-delete-files-from-amazon-s3-bucket
-def delete_S3_Object(boto3_client, bucket_name, bucket_object_key):
-    print bucket_object_key
-    boto3_client.delete_object(Bucket=bucket_name, Key=bucket_object_key)
+def delete_S3_Object(str_bucket_name, str_bucket_object_key, DEBUG=True):
+    if DEBUG:
+        print 'aws_functions.py --> delete_S3_Object: START'
+        print 'str_bucket_name=%s' % (str(str_bucket_name))
+        print 'str_bucket_object_key=%s' % (str(str_bucket_object_key))
+    s3_bucket = boto3.resource('s3').Bucket(str_bucket_name)
+    if DEBUG:
+        print 'aws_functions.py --> delete_S3_Object: s3 BUCKET CREATED'
+    try:
+        s3_bucket.delete_objects(
+                Delete={
+                        'Objects': [{'Key': str_bucket_object_key}]
+                        }
+                )
+        # s3_bucket.delete_object(Bucket=bucket_name, Key=bucket_object_key)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+            return False
+        else:
+            raise
+            return False
+        
+    if DEBUG:
+        print 'aws_functions.py --> delete_S3_Object: FINISH'
+    
+    return True
 
 # https://stackoverflow.com/questions/33104579/boto3-s3-folder-not-getting-deleted
 def delete_S3_Folder_Contents3(s3_resource, bucket_name, folder_name):
@@ -146,11 +191,50 @@ def delete_S3_Folder_Contents3(s3_resource, bucket_name, folder_name):
                         }
                 )
 
-# boto3
+
+
+# ************
+# CREATE
+# ************
+
 # https://github.com/aws/aws-cli/issues/2603
 def create_S3_Bucket(boto3_client, bucket_name, bucket_region):
     #s3 = boto3.client('s3')
     boto3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': bucket_region})
+
+
+
+# ************
+# DOWNLOAD
+# ************
+
+def download_S3_Object(str_bucket_name, str_bucket_object_key, str_local_dir, DEBUG=True):
+    if DEBUG:
+        print 'aws_functions.py --> download_S3_Object: START'
+        print 'str_bucket_name=%s' % (str(str_bucket_name))
+        print 'str_bucket_object_key=%s' % (str(str_bucket_object_key))
+        print 'str_local_dir=%s' % (str(str_local_dir))
+    
+    s3_bucket = boto3.resource('s3').Bucket(str_bucket_name)
+    
+    if DEBUG:
+        print 'aws_functions.py --> download_S3_Object: s3 BUCKET CREATED'
+    
+    try:
+        s3_bucket.download_file(str_bucket_object_key, str_local_dir)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+            return False
+        else:
+            raise
+            return False
+        
+    if DEBUG:
+        print 'aws_functions.py --> download_S3_Object: s3 BUCKET OBJECT CREATED'
+        print 'aws_functions.py --> download_S3_Object: FINISH'
+    
+    return True
 
 # https://stackoverflow.com/questions/31918960/boto3-to-download-all-files-from-a-s3-bucket/31929277
 def download_S3_Bucket(boto3_client, str_bucket_name, str_bucket_path, str_local_relative_target):
@@ -180,28 +264,9 @@ def download_S3_Bucket(boto3_client, str_bucket_name, str_bucket_path, str_local
                 create_Folders_Along_Path(local_file_dir)
                 boto3_client.download_file(str_bucket_name, key['Key'], local_file_path)
 
-# https://github.com/boto/boto3/issues/358
-# https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
-from awscli.clidriver import create_clidriver
-
-def aws_cli(*cmd):
-    old_env = dict(os.environ)
-    try:
-
-        # Environment
-        env = os.environ.copy()
-        env['LC_CTYPE'] = u'en_US.UTF'
-        os.environ.update(env)
-        
-        # Run awscli in the same process
-        exit_code = create_clidriver().main(*cmd)
-
-        # Deal with problems
-        if exit_code > 0:
-            raise RuntimeError('AWS CLI exited with code {}'.format(exit_code))
-    finally:
-        os.environ.clear()
-        os.environ.update(old_env)
+# ************
+# SYNC
+# ************
 
 # FROM_LOCAL_SOURCE: Used to designate whether you want to sync from the local source to S3 or from S3 to local
 # issue: --exact-timestamps didn't work as expected: https://github.com/aws/aws-cli/issues/2000
@@ -242,3 +307,36 @@ def sync_S3_Bucket_With_S3_Bucket(str_source_bucket_name, str_source_bucket_path
     print command
     
     aws_cli(commands)
+
+
+'''
+
+AWSCLI FUNCTIONS
+
+
+'''
+
+
+
+# https://github.com/boto/boto3/issues/358
+# https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
+from awscli.clidriver import create_clidriver
+
+def aws_cli(*cmd):
+    old_env = dict(os.environ)
+    try:
+
+        # Environment
+        env = os.environ.copy()
+        env['LC_CTYPE'] = u'en_US.UTF'
+        os.environ.update(env)
+        
+        # Run awscli in the same process
+        exit_code = create_clidriver().main(*cmd)
+
+        # Deal with problems
+        if exit_code > 0:
+            raise RuntimeError('AWS CLI exited with code {}'.format(exit_code))
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
