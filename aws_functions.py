@@ -11,7 +11,7 @@ import os
 # used to designate the content type on S3 upload due to download vs render issue
 import mimetypes
 
-from os_functions import create_Folders_Along_Path
+from os_functions import create_Folders_Along_Path, convert_To_Date_Time
 from thread_class import Bounded_Semaphore_Thread
 
     
@@ -70,15 +70,15 @@ S3
 def upload_File_To_S3_From_Local(str_bucket_name, str_local_dir, str_bucket_object_key, DEBUG=True):
     if DEBUG:
         print 'aws_functions.py --> upload_File_To_S3: START'
-        print 'str_bucket_name=%s' % (str(str_bucket_name))
-        print 'str_local_dir=%s' % (str(str_local_dir))
-        print 'str_local_dir type is %s' % (str(mimetypes.guess_type(str_local_dir)[0]))
-        print 'str_bucket_object_key=%s' % (str(str_bucket_object_key))
+        print 'aws_functions.py --> upload_File_To_S3: str_bucket_name=%s' % (str(str_bucket_name))
+        print 'aws_functions.py --> upload_File_To_S3: str_local_dir=%s' % (str(str_local_dir))
+        print 'aws_functions.py --> upload_File_To_S3: str_local_dir type is %s' % (str(mimetypes.guess_type(str_local_dir)[0]))
+        print 'aws_functions.py --> upload_File_To_S3: str_bucket_object_key=%s' % (str(str_bucket_object_key))
     
     s3_bucket = boto3.resource('s3').Bucket(str_bucket_name)
     
     if DEBUG:
-        print 'aws_functions.py --> upload_File_To_S3: s3 BUCKET CREATED'
+        print 'aws_functions.py --> upload_File_To_S3: s3 BUCKET RESOURCE INSTANTIATED'
     try:
         s3_bucket.upload_file(str_local_dir, str_bucket_object_key, ExtraArgs={'ContentType': mimetypes.guess_type(str_local_dir)[0]})
     except botocore.exceptions.ClientError as e:
@@ -133,14 +133,15 @@ def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client
 # ************
 
 # https://stackoverflow.com/questions/3140779/how-to-delete-files-from-amazon-s3-bucket
+# https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.delete_object
 def delete_S3_Object(str_bucket_name, str_bucket_object_key, DEBUG=True):
     if DEBUG:
         print 'aws_functions.py --> delete_S3_Object: START'
-        print 'str_bucket_name=%s' % (str(str_bucket_name))
-        print 'str_bucket_object_key=%s' % (str(str_bucket_object_key))
+        print 'aws_functions.py --> delete_S3_Object: str_bucket_name=%s' % (str(str_bucket_name))
+        print 'aws_functions.py --> delete_S3_Object: str_bucket_object_key=%s' % (str(str_bucket_object_key))
     s3_bucket = boto3.resource('s3').Bucket(str_bucket_name)
     if DEBUG:
-        print 'aws_functions.py --> delete_S3_Object: s3 BUCKET CREATED'
+        print 'aws_functions.py --> delete_S3_Object: s3 RESOURCE INSTANTIATED'
     try:
         s3_bucket.delete_objects(
                 Delete={
@@ -150,13 +151,16 @@ def delete_S3_Object(str_bucket_name, str_bucket_object_key, DEBUG=True):
         # s3_bucket.delete_object(Bucket=bucket_name, Key=bucket_object_key)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            print("The object does not exist.")
+            if DEBUG:
+                print 'aws_functions.py --> delete_S3_Object: s3 OBJECT DOESNT EXIST'
+                print 'aws_functions.py --> delete_S3_Object: FINISH'
             return False
         else:
             raise
             return False
         
     if DEBUG:
+        print 'aws_functions.py --> delete_S3_Object: s3 OBJECT DELETED'
         print 'aws_functions.py --> delete_S3_Object: FINISH'
     
     return True
@@ -208,23 +212,27 @@ def create_S3_Bucket(boto3_client, bucket_name, bucket_region):
 # DOWNLOAD
 # ************
 
-def download_S3_Object(str_bucket_name, str_bucket_object_key, str_local_dir, DEBUG=True):
+def download_S3_Object(str_bucket_name, str_bucket_object_key, str_local_dir, DEBUG=False):
     if DEBUG:
         print 'aws_functions.py --> download_S3_Object: START'
-        print 'str_bucket_name=%s' % (str(str_bucket_name))
-        print 'str_bucket_object_key=%s' % (str(str_bucket_object_key))
-        print 'str_local_dir=%s' % (str(str_local_dir))
+        print 'aws_functions.py --> download_S3_Object: str_bucket_name=%s' % (str(str_bucket_name))
+        print 'aws_functions.py --> download_S3_Object: str_bucket_object_key=%s' % (str(str_bucket_object_key))
+        print 'aws_functions.py --> download_S3_Object: str_local_dir=%s' % (str(str_local_dir))
+    else:
+        print 'download_S3_Object: s3://%s/%s --> %s' % (str(str_bucket_name), str(str_bucket_object_key), str(str_local_dir))
     
     s3_bucket = boto3.resource('s3').Bucket(str_bucket_name)
     
     if DEBUG:
-        print 'aws_functions.py --> download_S3_Object: s3 BUCKET CREATED'
+        print 'aws_functions.py --> download_S3_Object: s3 RESOURCE INSTANTIATED'
     
     try:
         s3_bucket.download_file(str_bucket_object_key, str_local_dir)
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            print("The object does not exist.")
+            if DEBUG:
+                print 'aws_functions.py --> download_S3_Object: s3 OBJECT DOESNT EXIST'
+                print 'aws_functions.py --> download_S3_Object: FINISH'
             return False
         else:
             raise
@@ -263,6 +271,77 @@ def download_S3_Bucket(boto3_client, str_bucket_name, str_bucket_path, str_local
                 local_file_dir = os.path.dirname(local_file_path)
                 create_Folders_Along_Path(local_file_dir)
                 boto3_client.download_file(str_bucket_name, key['Key'], local_file_path)
+
+# ************
+# INFO
+# ************
+# https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.ServiceResource.ObjectSummary
+def get_S3_Bucket_Object_Info(str_bucket_name, str_bucket_object_key, DEBUG=False):
+    if DEBUG:
+        print 'aws_functions.py --> get_S3_Bucket_Object_Info: START'
+        print 'aws_functions.py --> get_S3_Bucket_Object_Info: str_bucket_name=%s' % (str(str_bucket_name))
+        print 'aws_functions.py --> get_S3_Bucket_Object_Info: str_bucket_object_key=%s' % (str(str_bucket_object_key))
+    else:
+        print 'get_S3_Bucket_Object_Info: s3://%s/%s' % (str(str_bucket_name), str(str_bucket_object_key))
+    
+    try:
+        s3_object_summary = boto3.resource('s3').ObjectSummary(str_bucket_name, str_bucket_object_key)
+    
+        if DEBUG:
+            print 'aws_functions.py --> get_S3_Bucket_Object_Info: s3 OBJECT SUMMARY INSTANTIATED'
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            if DEBUG:
+                print 'aws_functions.py --> get_S3_Bucket_Object_Info: s3 OBJECT DOESNT EXIST'
+                print 'aws_functions.py --> get_S3_Bucket_Object_Info: FINISH'
+            return False
+        else:
+            raise
+            return False
+        
+    if DEBUG:
+        print 'aws_functions.py --> get_S3_Bucket_Object_Info: s3 BUCKET OBJECT SUMMARY COLLECTED'
+        print 'aws_functions.py --> get_S3_Bucket_Object_Info: FINISH'
+    
+    return s3_object_summary
+
+def get_S3_Bucket_Object_Last_Modified_Date(str_bucket_name, str_bucket_object_key, DEBUG=False):
+    if DEBUG:
+        print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: START'
+        print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: str_bucket_name=%s' % (str(str_bucket_name))
+        print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: str_bucket_object_key=%s' % (str(str_bucket_object_key))
+    else:
+        print 'get_S3_Bucket_Object_Last_Modified_Date: s3://%s/%s' % (str(str_bucket_name), str(str_bucket_object_key))
+    
+    try:
+        if DEBUG:
+            print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date --> get_S3_Bucket_Object_Info'
+        last_modified = get_S3_Bucket_Object_Info(str_bucket_name, str_bucket_object_key).last_modified
+        print 'BEFORE'
+        print type(last_modified)
+        print str(last_modified)
+        last_modified = convert_To_Date_Time(last_modified)
+        print 'AFTER'
+        print type(last_modified)
+        print str(last_modified)
+    
+        if DEBUG:
+            print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date --> get_S3_Bucket_Object_Info: FINISHED'
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            if DEBUG:
+                print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: s3 OBJECT DOESNT EXIST'
+                print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: FINISH'
+            return False
+        else:
+            raise
+            return False
+    
+    if DEBUG:
+        print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: s3 BUCKET OBJECT LAST MODIFIED DATE COLLECTED'
+        print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: FINISH'
+    
+    return last_modified
 
 # ************
 # SYNC

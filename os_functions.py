@@ -111,12 +111,18 @@ def get_Current_Date_Minus_Days(days_to_subtract):
 
 def get_Mod_Date_Time(filename):
     if evaluate_If_File_Exists(filename):
-        return os.path.getmtime(filename)
+        return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
     else:
         return 0
 
 def get_Mod_Date(filename):
-    return datetime.datetime.fromtimestamp(get_Mod_Date_Time(filename)).strftime('%Y-%m-%d')
+    return get_Mod_Date_Time(filename).strftime('%Y-%m-%d')
+
+def convert_Date_Time_To_Date(date_time):
+    return datetime.datetime.fromtimestamp(date_time).strftime('%Y-%m-%d')
+
+def convert_To_Date_Time(date_object):
+    return datetime.datetime.strptime(datetime.datetime.strftime(date_object, '%Y-%m-%d %H:%M:%S.%f'), '%Y-%m-%d %H:%M:%S.%f')
 
 def get_File_List(filename):
     # example value ('~/folder1/folder2' + '*.png') # * means all. If need specific format then *.csv
