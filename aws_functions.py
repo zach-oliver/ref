@@ -13,7 +13,6 @@ import mimetypes
 
 from os_functions import create_Folders_Along_Path, convert_To_Date_Time
 from thread_class import Bounded_Semaphore_Thread
-
     
 '''
 
@@ -317,13 +316,7 @@ def get_S3_Bucket_Object_Last_Modified_Date(str_bucket_name, str_bucket_object_k
         if DEBUG:
             print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date --> get_S3_Bucket_Object_Info'
         last_modified = get_S3_Bucket_Object_Info(str_bucket_name, str_bucket_object_key).last_modified
-        print 'BEFORE'
-        print type(last_modified)
-        print str(last_modified)
         last_modified = convert_To_Date_Time(last_modified)
-        print 'AFTER'
-        print type(last_modified)
-        print str(last_modified)
     
         if DEBUG:
             print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date --> get_S3_Bucket_Object_Info: FINISHED'
@@ -332,10 +325,10 @@ def get_S3_Bucket_Object_Last_Modified_Date(str_bucket_name, str_bucket_object_k
             if DEBUG:
                 print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: s3 OBJECT DOESNT EXIST'
                 print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: FINISH'
-            return False
+            return 0
         else:
             raise
-            return False
+            return 0
     
     if DEBUG:
         print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: s3 BUCKET OBJECT LAST MODIFIED DATE COLLECTED'
