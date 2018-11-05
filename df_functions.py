@@ -89,6 +89,9 @@ def df_get_row_column(df,row,column):
 def df_get_top(df,top):
     return df.head(top)
 
+def df_get_top_as_str(df,top):
+    return df_get_top(df,top).to_string()
+
 def df_get_bottom(df,bottom):
     return df.tail(bottom)
 
@@ -231,6 +234,9 @@ field -- name of attirbute you want to replace nulls with 0
 """
 def df_format_replace_all_null(df):
     df.fillna(0, inplace=True)
+    
+def df_format_as_str(df):
+    return df.to_string()
 
 '''********************************************
 ********************CREATE*********************
