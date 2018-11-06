@@ -105,6 +105,9 @@ def get_Current_Date():
 def get_Current_Date_Time():
     return datetime.datetime.now()
 
+def get_Current_Date_Time_As_Str():
+    return str(datetime.datetime.now())
+
 # https://stackoverflow.com/questions/441147/how-to-subtract-a-day-from-a-date
 def get_Current_Date_Minus_Days(days_to_subtract):
     return (datetime.datetime.now().date() - datetime.timedelta(days=days_to_subtract)).strftime('%Y-%m-%d')

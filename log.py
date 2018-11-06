@@ -5,51 +5,35 @@ Created on 12/26/17
 @author: Zachary Oliver
 """
 
-import datetime
-from os_functions import create_Folders_Along_Path
+from os_functions import create_Folders_Along_Path, get_Current_Date_Time_As_Str
 
 class Log:
     
-    def __init__(self, prefix='', log_dir='', DEBUG=False):
-        #self.loc = LOG_DIR + str(datetime.datetime.now()) + prefix + '.txt'
-        #self.loc = str(datetime.datetime.now()) + prefix + '/' + prefix + '_' + str(datetime.datetime.now()) + '.txt'
-        self.loc = str(datetime.datetime.now()) + prefix + '.txt'
+    def __init__(self, filename='', function='', prefix='', log_dir='', separator='|:|', DEBUG=False):
+        if prefix != '':
+            print "WARNING: %s prefix will no longer be used. Switch to filename instead for better logging."
+        self.loc = get_Current_Date_Time_As_Str() + filename + '.log'
         self.DEBUG = DEBUG
         if self.DEBUG:
             print "log.py --> Log --> self.loc (file name): %s" % self.loc
-        
-        # use the below if you need cwd
-        '''
-        cwd = get_Current_Working_Directory()
-        if DEBUG:
-            print "log.py --> Log --> cwd (full path): %s" % str(cwd)
-        self.loc = "%s%s%s" % (cwd, log_dir, self.loc)
-        '''
         
         self.loc = "%s%s" % (log_dir, self.loc)
 
         if self.DEBUG:
             print "log.py --> Log --> self.loc (full path): %s" % self.loc
+            
+        self.FILENAME = filename
         
-        # windows
-        '''
-        temp = os.path.join('.', LOG_DIR)
-        print 'temp: ' + temp
-        #self.loc = os.path.relpath(os.path.join(temp, self.loc))
-        self.loc = os.path.join(temp, self.loc)
-        self.loc = str(self.loc).replace(':','-')
-        self.loc = str(self.loc).replace(' ','_')
+        self.write(self.FILENAME)
         
-        self.loc = LOG_DIR + str(datetime.datetime.now()) + prefix + '.txt'
-        self.loc = os.path.relpath(os.path.join(LOG_DIR, self.loc))
-        self.loc = str(self.loc).replace(':','-')
-        self.loc = str(self.loc).replace(' ','_')
-        print self.loc
-        '''
+        self.FUNCTION = function
+        self.SEPARATOR = separator
     
     # can be deprecated as append will create file if it doesn't exist
     def write(self, log_line):
-        with open(self.loc, "w") as f:
+        create_Folders_Along_Path(self.loc)
+        
+        with open(self.loc, "a") as f:
             f.write(log_line)
             f.write("\n")
     
@@ -57,8 +41,15 @@ class Log:
     # doesn't handle non-strings
     def append(self, log_line):
         create_Folders_Along_Path(self.loc)
+        
+        log_line = self.FUNCTION + self.SEPARATOR + log_line
+        
         if self.DEBUG:
             print log_line
         with open(self.loc, "a") as f:
             f.write(log_line)
             f.write("\n")
+
+    def change_log_details(self, filename, function):
+        self.write(filename)
+        self.FUNCTION = function
