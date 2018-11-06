@@ -22,6 +22,9 @@ def dict_print_keys(d):
 def dict_get_value(d, key):
     return d[key]
 
+def dict_get_value_or_default(d, key, default_value):
+    return d.get(key, default_value)
+
 '''********************************************
 *********************ADD***********************
 ***********************************************
