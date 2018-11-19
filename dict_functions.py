@@ -40,14 +40,12 @@ def dict_change_value(d, key, value):
     dict_add_value(d, key, value)
 
 '''********************************************
-*********************CHANGE********************
+*********************MERGE********************
 ***********************************************
 '''
-# https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
+# realpython.com
 def dict_merge(dictx, dicty):
-    dictz = dictx.copy()   # start with x's keys and values
-    dictz.update(dicty)    # modifies z with y's keys and values & returns None
-    return dictz
+    return dict(dictx, **dicty)
 
 '''********************************************
 *********************SORT********************
