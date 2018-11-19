@@ -48,3 +48,10 @@ def dict_merge(dictx, dicty):
     dictz = dictx.copy()   # start with x's keys and values
     dictz.update(dicty)    # modifies z with y's keys and values & returns None
     return dictz
+
+'''********************************************
+*********************SORT********************
+***********************************************
+'''
+def dict_sort_by_value(d):
+    return sorted(d.items(), key=lambda x: x[1])
