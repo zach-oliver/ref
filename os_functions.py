@@ -119,7 +119,10 @@ def get_Mod_Date_Time(filename):
         return 0
 
 def get_Mod_Date(filename):
-    return get_Mod_Date_Time(filename).strftime('%Y-%m-%d')
+    if evaluate_If_File_Exists(filename):
+        return get_Mod_Date_Time(filename).strftime('%Y-%m-%d')
+    else:
+        return 0
 
 def convert_Date_Time_To_Date(date_time):
     return datetime.datetime.fromtimestamp(date_time).strftime('%Y-%m-%d')
