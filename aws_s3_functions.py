@@ -183,7 +183,7 @@ def create_S3_Bucket(boto3_client, bucket_name, bucket_region):
 # DOWNLOAD
 # ************
 
-def download_S3_Object(str_bucket_name, str_bucket_object_key, str_local_dir, DEBUG=False):
+def download_S3_Object(str_bucket_name, str_bucket_object_key, str_local_dir, DEBUG=True):
     if DEBUG:
         print 'aws_functions.py --> download_S3_Object: START'
         print 'aws_functions.py --> download_S3_Object: str_bucket_name=%s' % (str(str_bucket_name))
