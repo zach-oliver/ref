@@ -131,6 +131,13 @@ def get_File_List(filename):
     # example value ('~/folder1/folder2' + '*.png') # * means all. If need specific format then *.csv
     return glob.glob(filename)
 
+# https://stackoverflow.com/questions/2104080/how-to-check-file-size-in-python
+def get_File_Size(str_filename):
+    if evaluate_If_File_Exists(str_filename):
+        return os.path.getsize(str_filename)
+    else:
+        return 0
+
 # https://stackoverflow.com/questions/4906977/how-do-i-access-environment-variables-from-python
 def get_Environment_Variable(str_env_var):
     return os.environ.get(str_env_var)

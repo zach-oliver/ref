@@ -38,7 +38,7 @@ S3
 # https://stackoverflow.com/questions/18296875/amazon-s3-downloads-index-html-instead-of-serving
 # https://acloud.guru/forums/serverless-portfolio-with-react/discussion/-KyHqzSIDNFvxfb1Yz1D/S3%20is%20serving%20a%20download%20of%20my%20index.html%20instead%20of%20displaying%20it%20in%20the%20browser
 # https://github.com/robin-acloud/my-portfolio/commit/61ce4cb2d8a5754912b677fa996771a8e7f58d56
-def upload_File_To_S3_From_Local(str_bucket_name, str_local_dir, str_bucket_object_key, DEBUG=True):
+def upload_File_To_S3_From_Local(str_bucket_name, str_local_dir, str_bucket_object_key, DEBUG=False):
     if DEBUG:
         print 'aws_functions.py --> upload_File_To_S3: START'
         print 'aws_functions.py --> upload_File_To_S3: str_bucket_name=%s' % (str(str_bucket_name))
@@ -71,7 +71,7 @@ def upload_File_To_S3_From_Local(str_bucket_name, str_local_dir, str_bucket_obje
     
     return True
 
-def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client, bucket_name, DEBUG=True):
+def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client, bucket_name, DEBUG=False):
     threads = []
     # enumerate local files recursively
     # https://gist.github.com/feelinc/d1f541af4f31d09a2ec3
@@ -105,7 +105,7 @@ def upload_Directory_To_S3_From_Local(local_directory, destination, boto3_client
 
 # https://stackoverflow.com/questions/3140779/how-to-delete-files-from-amazon-s3-bucket
 # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.delete_object
-def delete_S3_Object(str_bucket_name, str_bucket_object_key, DEBUG=True):
+def delete_S3_Object(str_bucket_name, str_bucket_object_key, DEBUG=False):
     if DEBUG:
         print 'aws_functions.py --> delete_S3_Object: START'
         print 'aws_functions.py --> delete_S3_Object: str_bucket_name=%s' % (str(str_bucket_name))
@@ -307,6 +307,37 @@ def get_S3_Bucket_Object_Last_Modified_Date(str_bucket_name, str_bucket_object_k
         print 'aws_functions.py --> get_S3_Bucket_Object_Last_Modified_Date: FINISH'
     
     return last_modified
+
+def get_S3_Bucket_Object_Size(str_bucket_name, str_bucket_object_key, DEBUG=False):
+    if DEBUG:
+        print 'aws_functions.py --> get_S3_Bucket_Object_Size: START'
+        print 'aws_functions.py --> get_S3_Bucket_Object_Size: str_bucket_name=%s' % (str(str_bucket_name))
+        print 'aws_functions.py --> get_S3_Bucket_Object_Size: str_bucket_object_key=%s' % (str(str_bucket_object_key))
+    else:
+        print 'get_S3_Bucket_Object_Size: s3://%s/%s' % (str(str_bucket_name), str(str_bucket_object_key))
+    
+    try:
+        if DEBUG:
+            print 'aws_functions.py --> get_S3_Bucket_Object_Size --> get_S3_Bucket_Object_Info'
+        size = get_S3_Bucket_Object_Info(str_bucket_name, str_bucket_object_key).size
+    
+        if DEBUG:
+            print 'aws_functions.py --> get_S3_Bucket_Object_Size --> get_S3_Bucket_Object_Info: FINISHED'
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            if DEBUG:
+                print 'aws_functions.py --> get_S3_Bucket_Object_Size: s3 OBJECT DOESNT EXIST'
+                print 'aws_functions.py --> get_S3_Bucket_Object_Size: FINISH'
+            return 0
+        else:
+            raise
+            return 0
+    
+    if DEBUG:
+        print 'aws_functions.py --> get_S3_Bucket_Object_Size: s3 BUCKET OBJECT SIZE COLLECTED: %i' % (size)
+        print 'aws_functions.py --> get_S3_Bucket_Object_Size: FINISH'
+    
+    return size
 
 # ************
 # SYNC
