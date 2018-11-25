@@ -200,6 +200,7 @@ def download_S3_Object(str_bucket_name, str_bucket_object_key, str_local_dir, DE
     try:
         print str_bucket_object_key
         print str_local_dir
+        create_Folders_Along_Path(str_local_dir)
         s3_bucket.download_file(str_bucket_object_key, str_local_dir)
         print 'DONE DOWNLOAD!'
     except botocore.exceptions.ClientError as e:
