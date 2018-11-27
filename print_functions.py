@@ -7,16 +7,16 @@ Created on 11/19/17
 
 
 def print_variable_highlighted(variable, str_variable_name):
-	print "**************************************"
-	print "*									*"
+	print "***********************************************************"
+	print "                                                           "
 	print str_variable_name + ' ' + str(type(variable)) + ' : ' + str(variable)
-	print "*									*"
-	print "**************************************"
+	print "                                                           "
+	print "***********************************************************"
 
 def print_variables_highlighted(dict_variables):
-	print "**************************************"
-	print "*									*"
+	print "***********************************************************"
+	print "                                                           "
 	for key, value in dict_variables.iteritems():
 		print key + ' ' + str(type(value))  + ' : ' + str(value)
-	print "*									*"
-	print "**************************************"
+	print "                                                           "
+	print "***********************************************************"
