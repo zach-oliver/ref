@@ -67,6 +67,9 @@ def df_print_bottom(df,bottom):
 def df_print_random_sample(df,size):
     print df.sample(n=size, random_state=1)
 
+def df_print_details():
+    print 
+
 '''********************************************
 **********************GET**********************
 ***********************************************
@@ -108,6 +111,7 @@ def df_get_indexes(df, AS_TYPE=False):
         return df.index.astype(AS_TYPE)
     return df.index.values
 
+# UNIT TESTED
 def df_get_cell(df, str_index, str_column):
     return df.at[str_index, str_column]
 
@@ -116,6 +120,14 @@ def df_get_list_from_column(df, column):
 
 def df_get_list_of_list(df):
     return df.values.tolist()
+
+# UNIT TESTED
+def df_get_details(df):
+    return {
+            'column_data_types': df.dtypes,
+            'dataframe_shape': df.shape,
+            'data_descriptions': df.describe(include='all')
+            }
 
 '''********************************************
 ********************CHANGE********************
@@ -251,6 +263,14 @@ def df_create_blank_df(df_index, df_columns_list):
 def df_create_blank():
     return pd.DataFrame({'A' : []})
 
+# UNIT TESTED
+def df_create_basic_int():
+    return pd.DataFrame(data=[1,2,3,4], index=range(0,4), columns=['A'])
+
+# UNIT TESTED
+def df_create_basic_str():
+    return pd.DataFrame(data=['a','b','c','d'], index=range(0,4), columns=['A'])
+
 '''********************************************
 *********************CHECK*********************
 ***********************************************
@@ -259,9 +279,33 @@ def df_is_empty(df):
     return df.empty
 
 '''********************************************
-*********************SEARCH*********************
+*********************SEARCH********************
 ***********************************************
 '''
 # https://stackoverflow.com/questions/23549231/check-if-a-value-exists-in-pandas-dataframe-index
 def df_search_indexes(df, value):
     return value in df.index
+
+
+
+
+
+
+'''*******************************************************************
+********************       UNIT TESTS      ***************************
+**********************************************************************
+'''
+
+df_int = df_create_basic_int()
+dict_details_df_int = df_get_details(df_int)
+if dict_details_df_int['dataframe_shape'][0] != 4 or dict_details_df_int['dataframe_shape'][1] != 1:
+    print 'df_functions FAILED: df_create_basic_int, df_get_details dataframe_shape not correct'
+if df_get_cell(dict_details_df_int['data_descriptions'], 'count', 'A') != 4.0 or df_get_cell(dict_details_df_int['data_descriptions'], 'mean', 'A') != 2.5:
+    print 'df_functions FAILED: df_get_cell, df_get_details data_descriptions not correct'
+
+df_str = df_create_basic_str()
+dict_details_df_str = df_get_details(df_str)
+if dict_details_df_str['dataframe_shape'][0] != 4 or dict_details_df_str['dataframe_shape'][1] != 1:
+    print 'df_functions FAILED: df_create_basic_int, df_get_details shape not correct'
+if df_get_cell(dict_details_df_str['data_descriptions'], 'count', 'A') != 4 or df_get_cell(dict_details_df_str['data_descriptions'], 'top', 'A') != 'd':
+    print 'df_functions FAILED: df_get_cell, df_get_details data_descriptions not correct'

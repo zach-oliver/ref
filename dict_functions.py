@@ -15,6 +15,37 @@ def dict_print_value(d, key):
 def dict_print_keys(d):
     print d[0].keys()
 
+#https://stackoverflow.com/questions/3294889/iterating-over-dictionaries-using-for-loops
+# UNIT TESTED
+def dict_print_describe(d):
+    for key, value in d.iteritems():
+        print 'Key: %s' % str(key)
+        print 'Value:'
+        print value
+
+'''********************************************
+*********************OUTPUT********************
+***********************************************
+'''
+#https://stackoverflow.com/questions/3294889/iterating-over-dictionaries-using-for-loops
+# UNIT TESTED
+def dict_output_describe_list(d):
+    output = []
+    if d is not None:
+        for key, value in d.iteritems():
+            output.append('Key: %s' % str(key))
+            output.append('Value:')
+            output.append(str(value))
+    return output
+
+'''********************************************
+*********************SORT********************
+***********************************************
+'''
+# UNIT TESTED
+def dict_sort_by_value(d):
+    return sorted(d.items(), key=lambda x: x[1])
+
 '''********************************************
 *********************GET***********************
 ***********************************************
@@ -48,8 +79,27 @@ def dict_merge(dictx, dicty):
     return dict(dictx, **dicty)
 
 '''********************************************
-*********************SORT********************
+*********************CREATE********************
 ***********************************************
 '''
-def dict_sort_by_value(d):
-    return sorted(d.items(), key=lambda x: x[1])
+# UNIT TESTED
+def dict_create_basic():
+    return {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+
+
+'''*******************************************************************
+********************       UNIT TESTS      ***************************
+**********************************************************************
+'''
+d = dict_create_basic()
+if d is None:
+    print 'dict_functions FAILED: dict_create_basic is None'
+dict_print_describe(d)
+
+list_dict_sort = dict_sort_by_value(d)
+if list_dict_sort[0][0] != 'a' or list_dict_sort[3][1] != 4:
+    print 'dict_functions FAILED: dict_sort_by_value not correct'
+
+list_dict_output = dict_output_describe_list(d)
+if list_dict_output[0] != 'Key: a' or list_dict_output[5] != '3':
+    print 'dict_functions FAILED: dict_output_describe_list not correct'
