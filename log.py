@@ -5,14 +5,14 @@ Created on 12/26/17
 @author: Zachary Oliver
 """
 
-from os_functions import create_Folders_Along_Path, get_Current_Date_Time_As_Str
+from os_functions import create_Folders_Along_Path, get_Current_Date_Time
 
 class Log:
     
     def __init__(self, filename='', function='', prefix='', log_dir='', separator='|:|', DEBUG=False):
         if prefix != '':
-            print "WARNING: %s prefix will no longer be used. Switch to filename instead for better logging."
-        self.loc = get_Current_Date_Time_As_Str() + filename + '.log'
+            print "log.py WARNING: %s prefix will no longer be used. Switch to filename instead for better logging." % (prefix)
+        self.loc = get_Current_Date_Time(AS_STR=True) + filename + '.log'
         self.DEBUG = DEBUG
         if self.DEBUG:
             print "log.py --> Log --> self.loc (file name): %s" % self.loc
@@ -50,6 +50,6 @@ class Log:
             f.write(log_line)
             f.write("\n")
 
-    def change_log_details(self, filename, function):
-        self.write(filename)
-        self.FUNCTION = function
+    def change_log_details(self, str_filename, str_function):
+        self.FILENAME = str_filename
+        self.FUNCTION = str_function

@@ -24,10 +24,10 @@ def df_read_csv(relative_path, DF_INDEX_CSV_COLUMN_NUMBER=0):
     if evaluate_If_File_Exists(relative_path):
         df = pd.read_csv(relative_path, index_col=DF_INDEX_CSV_COLUMN_NUMBER)
         if df_is_empty(df):
-            return False
+            return None
         return df
     else:
-        return False
+        return None
 
 def df_read_dict(dict):
     df = pd.DataFrame.from_dict(dict)
@@ -223,7 +223,6 @@ def df_sort_by_column(df, str_column, sort_ascending=False):
 '''
 def df_format_object_to_date(df, str_column):
     df[str_column] = pd.to_datetime(df[str_column])
-    #df[str_column] = pd.to_datetime(df[str_column]).dt.strftime('%Y/%m/%d')
 
 """ replace_null
 replaces null in bed with 0 and returns the data frame

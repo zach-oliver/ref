@@ -86,6 +86,15 @@ def dict_merge(dictx, dicty):
 def dict_create_basic():
     return {'a': 1, 'b': 2, 'c': 3, 'd': 4}
 
+'''********************************************
+*********************SEARCH********************
+***********************************************
+'''
+# https://stackoverflow.com/questions/1602934/check-if-a-given-key-already-exists-in-a-dictionary
+# UNIT TESTED
+def dict_search_keys(d, key):
+    return key in d
+
 
 '''*******************************************************************
 ********************       UNIT TESTS      ***************************
@@ -94,7 +103,7 @@ def dict_create_basic():
 d = dict_create_basic()
 if d is None:
     print 'dict_functions FAILED: dict_create_basic is None'
-dict_print_describe(d)
+#dict_print_describe(d)
 
 list_dict_sort = dict_sort_by_value(d)
 if list_dict_sort[0][0] != 'a' or list_dict_sort[3][1] != 4:
@@ -103,3 +112,6 @@ if list_dict_sort[0][0] != 'a' or list_dict_sort[3][1] != 4:
 list_dict_output = dict_output_describe_list(d)
 if list_dict_output[0] != 'Key: a' or list_dict_output[5] != '3':
     print 'dict_functions FAILED: dict_output_describe_list not correct'
+
+if not dict_search_keys(d, 'a') or dict_search_keys(d, 'e'):
+    print 'dict_functions FALILED: dict_search_keys not correct'

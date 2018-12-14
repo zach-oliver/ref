@@ -10,6 +10,7 @@ import errno
 import datetime
 import glob
 import imp
+from dateutil.relativedelta import relativedelta
 
 # https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder-in-python
 def delete_All_In_Folder(folder):
@@ -99,18 +100,35 @@ def join_With_Current_Working_Directory(str_local_dir):
     #return '%s%s' % (str(os.getcwd()), str_local_dir)
     return full_path
 
-def get_Current_Date():
-    return datetime.datetime.now().date().strftime('%Y-%m-%d')
+# UNIT TESTED
+def get_Current_Date(AS_STR=False):
+    if AS_STR:
+        return datetime.datetime.now().date().strftime('%Y-%m-%d')
+    else:
+        return datetime.datetime.now().date()
 
-def get_Current_Date_Time():
-    return datetime.datetime.now()
+# UNIT TESTED
+def get_Current_Date_Time(AS_STR=False):
+    if AS_STR:
+        return str(datetime.datetime.now())
+    else:
+        return datetime.datetime.now()
 
+# DEPRECATE!!!
 def get_Current_Date_Time_As_Str():
     return str(datetime.datetime.now())
 
 # https://stackoverflow.com/questions/441147/how-to-subtract-a-day-from-a-date
-def get_Current_Date_Minus_Days(days_to_subtract):
-    return (datetime.datetime.now().date() - datetime.timedelta(days=days_to_subtract)).strftime('%Y-%m-%d')
+def get_Current_Date_Minus_Days(int_days_to_subtract):
+    return (datetime.datetime.now().date() - datetime.timedelta(days=int_days_to_subtract)).strftime('%Y-%m-%d')
+
+# UNIT TESTED
+def get_Current_Date_Minus_Months(int_months, AS_STR=False):
+    if AS_STR:
+        d = datetime.date.today() + relativedelta(months=-int_months)
+        return d.strftime('%Y-%m-%d')
+    else:
+        return (datetime.date.today() + relativedelta(months=-int_months))
 
 def get_Mod_Date_Time(filename):
     if evaluate_If_File_Exists(filename):
@@ -200,3 +218,15 @@ def file_Line_Prepender(filename_str, line_str):
         content = f.read()
         f.seek(0, 0)
         f.write(line_str.rstrip('\r\n') + '\n' + content)
+
+# https://www.pythoncentral.io/how-to-rename-move-a-file-in-python/
+def move_File(source_str, destination_str):
+    shutil.move(source_str, destination_str)
+
+''' *******************************************************************
+***************************     UNIT TESTING    ***********************
+***********************************************************************
+'''
+#print get_Current_Date(AS_STR=True)
+#print get_Current_Date_Minus_Months(3, AS_STR=True)
+#print get_Current_Date_Time(AS_STR=True)
