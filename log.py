@@ -39,10 +39,10 @@ class Log:
     
     # adds log_line to the end of the file
     # doesn't handle non-strings
-    def append(self, log_line):
+    def append(self, str_log_line):
         create_Folders_Along_Path(self.loc)
         
-        log_line = self.FUNCTION + self.SEPARATOR + log_line
+        log_line = str(self.FUNCTION) + str(self.SEPARATOR) + str(str_log_line)
         
         if self.DEBUG:
             print log_line
