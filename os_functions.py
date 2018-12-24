@@ -150,6 +150,8 @@ def convert_To_Date_Time(date_object):
     return datetime.datetime.strptime(datetime.datetime.strftime(date_object, '%Y-%m-%d %H:%M:%S.%f'), '%Y-%m-%d %H:%M:%S.%f')
 
 # UNIT TESTED
+# LOCAL vs UTC ISSUE: https://stackoverflow.com/questions/8777753/converting-datetime-date-to-utc-timestamp-in-python/8778548#8778548
+# Maybe update epoch instead?
 def convert_Datetime_To_Timestamp(datetime_obj, epoch=datetime.datetime(1970,1,1)):
     # utc time = local time              - utc offset
     #utc_naive  = datetime_obj.replace(tzinfo=None) - datetime_obj.utcoffset()
@@ -187,6 +189,7 @@ def evaluate_Mod_Date(str_filename, minus_days):
         return True
 
 # UNIT TESTED
+# https://www.tutorialspoint.com/python/os_utime.htm
 def change_Mod_Date(str_filename, datetime_object):
     os.utime(str_filename, (convert_Datetime_To_Timestamp(datetime_object), convert_Datetime_To_Timestamp(datetime_object)))
 
