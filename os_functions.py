@@ -70,16 +70,16 @@ def delete_Files_Not_Folders(folder, log, DEBUG=False):
         print msg
         log.append(msg)
 
-def delete_File(filename, log, DEBUG=False):
+# UNIT TESTED
+def delete_File(filename, DEBUG=False):
     if DEBUG:
         print(filename)
-    log.append(filename)
     # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
     if os.path.exists(filename):
         os.remove(filename)
     else:
-        msg = "delete_File --> %s: file not found" % filename
-        log.append(msg)
+        if DEBUG:
+            print "delete_File --> %s: file not found" % filename
 
 def create_Folders_Along_Path(path):
     # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
@@ -130,6 +130,7 @@ def get_Current_Date_Minus_Months(int_months, AS_STR=False):
     else:
         return (datetime.date.today() + relativedelta(months=-int_months))
 
+# UNIT TESTED
 def get_Mod_Date_Time(filename):
     if evaluate_If_File_Exists(filename):
         return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
@@ -142,11 +143,19 @@ def get_Mod_Date(filename):
     else:
         return 0
 
-def convert_Date_Time_To_Date(date_time):
-    return datetime.datetime.fromtimestamp(date_time).strftime('%Y-%m-%d')
+def convert_Date_Time_To_Date(datetime_object):
+    return datetime.datetime.fromtimestamp(datetime_object).strftime('%Y-%m-%d')
 
 def convert_To_Date_Time(date_object):
     return datetime.datetime.strptime(datetime.datetime.strftime(date_object, '%Y-%m-%d %H:%M:%S.%f'), '%Y-%m-%d %H:%M:%S.%f')
+
+# UNIT TESTED
+def convert_Datetime_To_Timestamp(datetime_obj, epoch=datetime.datetime(1970,1,1)):
+    # utc time = local time              - utc offset
+    #utc_naive  = datetime_obj.replace(tzinfo=None) - datetime_obj.utcoffset()
+    td = datetime_obj - epoch
+    #return (td.microseconds + (td.seconds + td.days * 86400) * 10**6) / 10**6
+    return td.total_seconds()
 
 def get_File_List(filename):
     # example value ('~/folder1/folder2' + '*.png') # * means all. If need specific format then *.csv
@@ -167,15 +176,19 @@ def get_Environment_Variable(str_env_var):
 def get_Environment_Variable_or_Default(str_env_var, default_value):
     return os.getenv(str_env_var, default_value)
 
-def evaluate_Mod_Date(filename, minus_days):
+def evaluate_Mod_Date(str_filename, minus_days):
     # https://stackoverflow.com/questions/82831/how-to-check-whether-a-file-exists
-    if evaluate_If_File_Exists(filename):
+    if evaluate_If_File_Exists(str_filename):
         # if the mod date of filename is older than today - minus days return True so you know to perform action
         # if not, false so don't perform an action
-        return (get_Mod_Date(filename) < get_Current_Date_Minus_Days(minus_days))
+        return (get_Mod_Date(str_filename) < get_Current_Date_Minus_Days(minus_days))
     else:
         # file not found so perform action
         return True
+
+# UNIT TESTED
+def change_Mod_Date(str_filename, datetime_object):
+    os.utime(str_filename, (convert_Datetime_To_Timestamp(datetime_object), convert_Datetime_To_Timestamp(datetime_object)))
 
 def evaluate_If_File_Exists(relative_filename, DEBUG=False):
     full_path = join_With_Current_Working_Directory(relative_filename)
@@ -207,10 +220,10 @@ def evaluate_Time_Difference(later_time, earlier_time, DEBUG=False):
     minutes = divmod(hours[1], 60)                # Use remainder of hours to calc minutes
     seconds = divmod(minutes[1], 1)               # Use remainder of minutes to calc seconds
     microseconds = duration.microseconds
-    time = "%d:%d:%d:%d.%d" % (days[0], hours[0], minutes[0], seconds[0], microseconds)
+    time_time = "%d:%d:%d:%d.%d" % (days[0], hours[0], minutes[0], seconds[0], microseconds)
     if DEBUG:
-        print time
-    return time
+        print time_time
+    return time_time
 
 # https://stackoverflow.com/questions/5914627/prepend-line-to-beginning-of-a-file
 def file_Line_Prepender(filename_str, line_str):
@@ -223,10 +236,49 @@ def file_Line_Prepender(filename_str, line_str):
 def move_File(source_str, destination_str):
     shutil.move(source_str, destination_str)
 
+# UNIT TESTED
+def create_File(destination_str='temp.txt', test_str='test'):
+    with open(destination_str, "a") as f:
+        f.write(test_str)
+        f.write("\n")
+
 ''' *******************************************************************
 ***************************     UNIT TESTING    ***********************
 ***********************************************************************
 '''
-#print get_Current_Date(AS_STR=True)
-#print get_Current_Date_Minus_Months(3, AS_STR=True)
-#print get_Current_Date_Time(AS_STR=True)
+def UNIT_TESTING(DEBUG=False):
+    if DEBUG:
+        this_file = 'os_functions.py'
+        
+        datetime_orig_last_modified = get_Mod_Date_Time(this_file)
+        print "%s last modified date: %s" % (this_file, str(datetime_orig_last_modified))
+        timestamp_orig_last_modified = convert_Datetime_To_Timestamp(datetime_orig_last_modified)
+        print "%s last modified date in timestamp: %s" % (this_file, str(timestamp_orig_last_modified))
+        
+        temp_file = 'temp.txt'
+        create_File(destination_str=temp_file)
+        
+        datetime_last_modified = get_Mod_Date_Time(temp_file)
+        print "%s last modified date: %s" % (temp_file, str(datetime_last_modified))
+        timestamp_last_modified = convert_Datetime_To_Timestamp(datetime_last_modified)
+        print "%s last modified date in timestamp: %s" % (temp_file, str(timestamp_last_modified))
+        
+        args = {
+            'str_filename': temp_file,
+            'datetime_object': datetime_orig_last_modified
+        }
+        change_Mod_Date(**args)
+        print "%s last modified date changed to: %s" % (temp_file, str(datetime_orig_last_modified))
+        
+        datetime_last_modified = get_Mod_Date_Time(temp_file)
+        print "%s last modified date: %s" % (temp_file, str(datetime_last_modified))
+        timestamp_last_modified = convert_Datetime_To_Timestamp(datetime_last_modified)
+        print "%s last modified date in time: %s" % (temp_file, str(timestamp_last_modified))
+        delete_File(temp_file)
+        
+        print get_Current_Date(AS_STR=True)
+        print get_Current_Date_Minus_Months(3, AS_STR=True)
+        print get_Current_Date_Time(AS_STR=True)
+
+UNIT_TESTING()
+
