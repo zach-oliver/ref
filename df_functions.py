@@ -75,33 +75,51 @@ def df_print_details():
 ***********************************************
 '''
 def df_get_column_name(df, index):
+    if df_is_empty(df):
+        return None
     return df.columns[index]
 
 def df_get_columns_all_rows(df,columns_list):
+    if df_is_empty(df):
+        return None
     return df[columns_list]
 
 def df_get_rows_all_columns(df,first,last):
+    if df_is_empty(df):
+        return None
     return df[first:last]
 
 def df_get_rows_columns(df,first_row,last_row,columns_list):
+    if df_is_empty(df):
+        return None
     return df[first_row:last_row,columns_list]
 
 def df_get_row_column(df,row,column):
+    if df_is_empty(df):
+        return None
     return df.iloc[row][column]
 
 def df_get_top(df,top):
+    if df_is_empty(df):
+        return None
     return df.head(top)
 
 def df_get_top_as_str(df,top):
+    if df_is_empty(df):
+        return None
     return df_get_top(df,top).to_string()
 
 def df_get_bottom(df,bottom):
+    if df_is_empty(df):
+        return None
     return df.tail(bottom)
 
 def df_get_rows_where_column_equals_value(df, column, value):
     return df.loc[(df[column] == value)]
 
 def df_get_random_sample(df,size):
+    if df_is_empty(df):
+        return None
     return df.sample(n=size, random_state=1)
 
 # AS_TYPE: https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.dtype.html#numpy.dtype
@@ -294,17 +312,19 @@ def df_search_indexes(df, value):
 ********************       UNIT TESTS      ***************************
 **********************************************************************
 '''
+def UNIT_TESTING():
+    df_int = df_create_basic_int()
+    dict_details_df_int = df_get_details(df_int)
+    if dict_details_df_int['dataframe_shape'][0] != 4 or dict_details_df_int['dataframe_shape'][1] != 1:
+        print 'df_functions FAILED: df_create_basic_int, df_get_details dataframe_shape not correct'
+    if df_get_cell(dict_details_df_int['data_descriptions'], 'count', 'A') != 4.0 or df_get_cell(dict_details_df_int['data_descriptions'], 'mean', 'A') != 2.5:
+        print 'df_functions FAILED: df_get_cell, df_get_details data_descriptions not correct'
 
-df_int = df_create_basic_int()
-dict_details_df_int = df_get_details(df_int)
-if dict_details_df_int['dataframe_shape'][0] != 4 or dict_details_df_int['dataframe_shape'][1] != 1:
-    print 'df_functions FAILED: df_create_basic_int, df_get_details dataframe_shape not correct'
-if df_get_cell(dict_details_df_int['data_descriptions'], 'count', 'A') != 4.0 or df_get_cell(dict_details_df_int['data_descriptions'], 'mean', 'A') != 2.5:
-    print 'df_functions FAILED: df_get_cell, df_get_details data_descriptions not correct'
+    df_str = df_create_basic_str()
+    dict_details_df_str = df_get_details(df_str)
+    if dict_details_df_str['dataframe_shape'][0] != 4 or dict_details_df_str['dataframe_shape'][1] != 1:
+        print 'df_functions FAILED: df_create_basic_int, df_get_details shape not correct'
+    if df_get_cell(dict_details_df_str['data_descriptions'], 'count', 'A') != 4 or df_get_cell(dict_details_df_str['data_descriptions'], 'top', 'A') != 'd':
+        print 'df_functions FAILED: df_get_cell, df_get_details data_descriptions not correct'
 
-df_str = df_create_basic_str()
-dict_details_df_str = df_get_details(df_str)
-if dict_details_df_str['dataframe_shape'][0] != 4 or dict_details_df_str['dataframe_shape'][1] != 1:
-    print 'df_functions FAILED: df_create_basic_int, df_get_details shape not correct'
-if df_get_cell(dict_details_df_str['data_descriptions'], 'count', 'A') != 4 or df_get_cell(dict_details_df_str['data_descriptions'], 'top', 'A') != 'd':
-    print 'df_functions FAILED: df_get_cell, df_get_details data_descriptions not correct'
+UNIT_TESTING()
